@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" href="css/ui-base.css">
+        <link rel="stylesheet" href="css/ui-box.css">
+        <link rel="stylesheet" href="css/ui-color.css">
+        <link rel="stylesheet" href="css/ui-res.css">
+        <link rel="stylesheet" href="css/ui-365.css">
+        <script src="js/zepto.min.js"></script>
+        <script src="js/beihai365_comman.js"></script>
+        <script src="js/beihai365_global.js"></script>
+        <script src="js/zy_control.js"></script>
+        <script src="js/zy_click.js"></script>
+        <script></script>
+    </head>
+    <body class="um-vp c-wh" ontouchstart>
+        <div id="page" class="up ub ub-ver" tabindex="0">
+            <!--header开始-->
+            <div id="header"></div>
+            <!--header结束--><!--content开始-->
+            <div id="detail_content" class="ub-f1 tx-l t-bla ub-img6 res10">
+
+            </div>
+            <!--content结束-->
+            <!--footer开始-->
+            <div class="read-footer">
+                <div id="footer">
+                    <div class="ub">
+                        <div class="read-footer-page js-read-page" onclick="pageView(this)">
+
+                        </div>
+                        <div class="read-footer-reply js-read-footer-reply" onclick="replyBtn()">
+                            回复
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="getBarHeight" class="getBarHeight"></div>
+            <div id="getBarHeight_ios7" class="getBarHeight_ios7"></div>
+            <!--footer结束-->
+        </div>
+    </body>
+    <script>
+        zy_init();
+        window.uexOnload = function(type) {
+            if (!type) {
+                uexWindow.setBounce("0");
+
+                zy_con("detail_content", "detail_content.html", 0, 0);
+
+                //记录一些窗口基本信息
+                localStorage.windowHeight = parseInt($(window).height());
+                localStorage.windowWidth = parseInt($(window).width());
+                var height;
+                if (uexWidgetOne.iOS7Style) {
+                    height = parseInt($$("getBarHeight_ios7").offsetHeight);
+                } else {
+                    height = parseInt($$("getBarHeight").offsetHeight);
+                }
+                uexWindow.openPopover("detail_content_layer", 0, "detail_content_layer.html", "", 0, 0, 0, height, 0, 0);
+
+                //监听android返回按钮
+                uexWindow.setReportKey(0, 1);
+                uexWindow.onKeyPressed = function(keyCode) {
+                    if (keyCode == 0) {
+                        closeWin();
+                    }
+                };
+            }
+            window.onorientationchange = window.onresize = function() {
+                //zy_resize("content",0,$$("header").offsetHeight);
+            }
+        }
+        //分页
+        function pageView(t) {
+
+            //alert(page)
+            uexWindow.evaluatePopoverScript("", "detail_content", "_pageView();");
+        };
+        //打开分页
+        function _setPageData(p) {
+            uexWindow.evaluatePopoverScript("", "detail_content", "oRead.page('" + p + "');");
+        }
+
+        //回复
+        function replyBtn() {
+            localStorage.pid = "";
+            localStorage.lou = "";
+            uexWindow.evaluatePopoverScript("", "detail_content", "_replyBtn();");
+        };
+        //关闭窗口
+        function closeWin() {
+            localStorage.detailWindowId = localStorage.detailWindowId - 1;
+            uexWindow.close('-1');
+        }
+
+        //设置分页状态
+        function _setPage(page, allpage) {
+            $(".js-read-page").html('第' + page + '页/共' + allpage + '页');
+            //$(".js-read-page").attr("page", page);
+            $(".js-read-page").attr("allpage", allpage);
+        }
+
+        //设置回复数量
+        function _setReply(s) {
+            $(".js-read-footer-reply").html("回复  " + s);
+        }
+
+        //分享
+        //打开分享窗口
+        function _showShare() {
+            uexWindow.evaluatePopoverScript("", "detail_content", "setShare();");
+            uexWindow.openPopover("shares", 0, "shares.html", '', 0, 0, 0, 0, '', 0, 0);
+        }
+
+        //显示头部窗口
+        function headerHide() {
+            uexWindow.sendPopoverToBack("detail_content_layer");
+        }
+
+        function headerShow() {
+            uexWindow.bringPopoverToFront("detail_content_layer");
+        }
+
+        //回复
+        function goPopoverScript(fn) {
+            uexWindow.evaluatePopoverScript("", "detail_content", fn);
+        };
+        oTiedan = {
+            close : function() {
+                uexWindow.evaluatePopoverScript("", "detail_open_plus_tiedan", "colseTiedan()");
+            }
+        }
+
+        function loginCallback() {
+            uexWindow.evaluateScript("login", 0, "colse();");
+
+            var returnType = getLocalStorge("returnType");
+            if (returnType == 'detailReply') {
+                uexWindow.evaluatePopoverScript("", "detail_content", "_replyBtn()");
+            } else {
+                uexWindow.evaluatePopoverScript("", "detail_content", "openTiedan()");
+            }
+        }
+
+        function tiedanCallback() {
+            uexWindow.evaluateScript("single-title", 0, "uexWindow.close(-1);");
+            uexWindow.toast("0", "5", "正在把帖子加到帖单中,请稍等...", 0);
+            setTimeout(function(){
+                uexWindow.closeToast();
+                var tiedanDecWindowId = 'single-dec' + localStorage.tiedanDecWindowId;
+                uexWindow.open(tiedanDecWindowId, '0', 'stick_single_dec.html', '12', '', '', '4');
+            },1500);  
+        }
+
+    //把tid记录下来，为要添加到浏览记录里面
+    if(localStorage.browseTid){
+        localStorage.browseTid = localStorage.browseTid +','+ localStorage.tid;
+    }else{
+        localStorage.browseTid = localStorage.tid
+    }
+
+
+    </script>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1.0, user-scalable=no" />
+        <link rel="stylesheet" href="css/ui-tab.css">
+        <link rel="stylesheet" href="css/ui-base.css">
+        <link rel="stylesheet" href="css/ui-box.css">
+        <link rel="stylesheet" href="css/ui-color.css">
+        <link rel="stylesheet" href="css/ui-res.css">
+        <link rel="stylesheet" href="css/ui-365.css">
+        <script src="js/zepto.min.js"></script>
+        <script src="js/md5.js"></script>
+        <script src="js/laytpl.js"></script>
+
+    </head>
+
+    <body>
+
+
+        <div class="pouple js-firstshow">
+            <img src="css/img/seach/sr.png" />
+        </div>
+
+        <script>
+        window.uexOnload = function(type) {
+            ;(function() {
+                
+                if (uexWidgetOne.iOS7Style) {
+                    $(".js-firstshow").css({"padding-top":"1.25rem"});
+                }
+                
+                $('.js-firstshow').click(function() {
+                    uexWindow.closePopover('first-page');
+                })
+            })()
+        }
+        </script>
+    </body>
+</html>

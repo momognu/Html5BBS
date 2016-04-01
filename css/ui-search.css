@@ -1,0 +1,90 @@
+/*搜索页*/
+input,button,select,textarea{outline:none;} 
+.bg_grey {
+    background-color: #f0f0f0;
+}
+
+.search_head {
+    background-color: #ffa200;
+    height: 3rem;
+
+}
+.search_form {
+        border-radius: .125rem;
+        background: #fff url(img/seach/soIcon.png) no-repeat .5rem center;
+        background-size:1rem;
+        margin: .5rem 0;
+        padding-left: 2rem;
+        height: 2rem;
+}
+.search_text {
+    height: 2rem;
+    font-size:1rem;
+    border: none;
+    width: 100%;
+    padding-right: 0.5rem;
+}
+.search_btn {
+    width:4rem;
+    height:3rem;
+    line-height:3rem;
+    color: #fff;
+    text-align:center;
+
+}
+
+.search-header-back{
+    width:3rem;
+    height:3rem;
+    background: url(img/seach/back.png) no-repeat center center ;
+    background-size: .75rem;
+    display: block;
+}
+/*搜索记录*/
+
+.search_record li {
+    color: #333;
+    border-bottom: .0625rem solid #cacaca;
+    height: 2.75rem;
+    line-height: 2.75rem;
+}
+.search_record li:not(.del_icon) {
+
+    height: 2.75rem;
+    background: url('img/seach/sear_icon.png') no-repeat 1.125rem .875rem;
+    background-size: 1rem 1rem;
+    padding-left: 2.875rem;
+    color: #333333;
+
+}
+
+.search_record .del_icon {
+    color: #ffa200;
+    text-indent:1.25rem;
+    text-align: center;
+    padding-right: 1.25rem;
+}
+.search_record .del_icon:before {
+    content: '\20';
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    background: url('img/seach/del.png') no-repeat;
+    background-size: contain;
+    vertical-align: -0.125rem;
+    padding-left: .25rem;
+}
+.search_tips_icon{
+    padding: 5rem 1rem 0;
+    color: #666;
+}
+.search_tips_icon:before{
+    content: '\20';
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    background: url('img/seach/noSearch.png') no-repeat;
+    background-size: contain;
+    vertical-align: -0.125rem;
+    padding-left: .25rem;
+}

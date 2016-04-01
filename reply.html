@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>
+    </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" href="css/ui-tab.css">
+        <link rel="stylesheet" href="css/ui-base.css">
+        <link rel="stylesheet" href="css/ui-box.css">
+        <link rel="stylesheet" href="css/ui-color.css">
+		<link rel="stylesheet" href="css/ui-res.css">
+		<link rel="stylesheet" href="css/ui-365.css">
+        <script src="js/zy_control.js"></script>
+        <script src="js/zy_click.js"></script>
+		<script src="js/beihai365_comman.js"></script>
+    </head>
+    <body class="um-vp c-wh" ontouchstart>
+        <div id="page_0" class="up ub ub-ver" tabindex="0">
+			<div id="header" class="uh c-m15 t-wh ub head_top_home">
+				<div class="list_back" ontouchstart="zy_touch('click_opacity')" onclick="uexWindow.close('-1');"></div>
+                <h1 id="form_name" class="ub-f1 ulev5 ut-s tx-c" tabindex="0"></h1>
+				<div class="list_re_btn tx-c list_re_btn_hui" id="list_re_btn_hui"><span class="f14">发布</span></div>
+				<div class="list_re_btn tx-c" id="list_re_btn" style="display:none;"><span class="f14">发布</span></div>
+
+            </div>
+            <!--header结束-->
+			<!--content开始-->
+            <div id="content" class="ub-f1 tx-l t-bla ub-img6 res10" style="padding:.4em;">
+				<!--文本开始-->
+					
+				<div class="div_textarea">    
+		   			<textarea placeholder="点击这里回复，回复内容要超过5个字哦！" name="message" id="message"></textarea>
+					<input type='hidden' id='img' value='' _value=''>
+				</div>
+				
+				<div class="upimgbtn" ontouchstart="zy_touch('btn-act')" onclick="uppick();"><span>上传图片</span></div>
+				<div class='thumbPlace'></div>
+				<!--文本结束-->
+
+            </div>
+            <!--content结束-->	
+        </div>
+    </body>
+	<script src="js/zepto.min.js"></script>
+	<script src="js/reply.js"></script>
+    <script>
+        zy_init();		
+		window.setInterval(function(){
+			localStorage.tmp_reply_post = $.trim($('#message').val());
+			localStorage.replyIMG = $.trim($('#img').attr('_value'));
+
+		}, 1000);
+		
+		window.uexOnload = function(){
+			localStorage.tmp_reply_post && $("#message").html(localStorage.tmp_reply_post);
+			
+			login_posts();
+			$("#list_re_btn").bind("click", postNewReply);
+			
+			
+			uexCamera.cbOpen = getReadyToUpload;
+			uexUploaderMgr.cbCreateUploader = uexUploaderMgrCbCreateUploader;
+			uexUploaderMgr.onStatus = uexUploaderMgrStatusCb;	
+			uexImageBrowser.cbPick = getReadyToUpload;
+		}
+		function login_posts(){
+			var uid = getLocalStorge('uid');
+			var username = getLocalStorge('username');		
+			$("#form_name").html("回帖("+username+")");
+			if(!uid){
+				uexWindow.open('login','0','login.html','1','100%','100%','0');
+			}else{
+				setInterval(function () {
+					posts(); 
+				}, 100);
+			}
+		}
+		function posts(){
+			var msg=$.trim($('#message').val());
+			if(msg.length > 5){
+				$("#list_re_btn").show();
+				$("#list_re_btn_hui").hide();
+
+			}else{
+				$("#list_re_btn_hui").show();
+				$("#list_re_btn").hide();
+			}
+			if (msg.length > 1000) {
+				uexWindow.toast("0","5","哥，你已经连续写下1000字了，手机随时受不了，赶快发送了吧！","5000");
+			}
+		}
+		
+		
+		
+/*
+发图JS
+*/
+var httpCode = 0;
+var picUploadHttp = beihai365_url + "/index.php?c=threads&m=uploadimg&uid="+localStorage.uid +"&save_code=" + localStorage.save_code;
+function getReadyToUpload(opCode, dataType, data){
+	
+	upload_image_url = data;
+	
+	//	var thumbHTML = '<div class="thumbPicBox"><img class="thumbPic" src="'+data+'" /><div id="thumbPicInfo"></div></div>';
+	//多张图片用append
+	//$('.thumbPlace').append(thumbHTML);	
+	//$('.thumbPlace').html(thumbHTML);
+	
+	var thumbHTML = '<div class="thumbPicBox">'+
+		'<div class="ub">'+
+			'<div id="thumbPic_box" ontouchstart="uexImageBrowser.open(\''+data+'\',0,0);"><img class="thumbPic" src="'+data+'" /></div>'+
+			'<div class="thumbub" id="thumbub">'+
+			'</div>'+
+		'</div>'+
+	'</div>';
+	$('.thumbPlace').html(thumbHTML);
+	httpCode = httpCode + 1;
+
+	uexUploaderMgr.createUploader(httpCode,picUploadHttp);
+		
+}
+
+function uexUploaderMgrCbCreateUploader(opCode,dataType,data){
+
+	if(data == 0){
+			
+		uexUploaderMgr.uploadFile(opCode,upload_image_url,"photo","0");	
+	}else{
+		alert('上传失败');
+	}
+}
+function uexUploaderMgrStatusCb(opCode,fileSize,percent,serverReback,status){
+	switch (status) {
+           case 0://正在上传
+                 if(fileSize>2097152){
+                     uexUploaderMgr.closeUploader(opCode);
+                     	alert('上传图片超过2M');
+					 return false;
+                  }else{
+				  		uexWindow.toast(1,5,'正在上传：'+percent + '%..',0);
+                  }
+                  break;
+           case 1://上传完毕
+           		 uexWindow.closeToast();
+				 var rjson = JSON.parse(serverReback);
+				  if(rjson.result == 'success'){
+				  	//多张图片使用+=，070需求只要一张
+					//$$('img').value += '[img]' + rstr[1] + '[/img]';
+					$$('img').value = '[img]' + rjson.url + '[/img]';
+					$('#img').attr("_value",rjson.url); 
+					var infotext ='<div class="thumbPicInfo"><span><div styel="word-wrap:break-word;">'+rjson.name+'</div>大小：+'+(rjson.size/1024/1024).toFixed(2)+'M</span></div><div class="thumbPicDel" ontouchstart="cancelPic()"><span>删除</span></div>';
+					$("#thumbub").css({height:$(".thumbPicBox").height()}).html(infotext);
+					
+				  }else{
+				  	alert(rjson.result);
+				  }
+				  uexUploaderMgr.closeUploader(opCode);
+				  $('.upimgbtn').html('<span>替换图片</span>');
+                  break;
+           case 2:
+		   		uexWindow.closeToast();
+           		 var rjson = JSON.parse(serverReback);
+				 //alert(rjson.result);
+				 cancelPic();
+                 alert("图片上传失败，可能是图片太大了，请缩小图片再试试看。");
+                 uexUploaderMgr.closeUploader(opCode);
+                 break;
+        }    
+}
+function cancelPic(objclass){
+	$(".thumbPicBox").hide();
+	//$(objclass).find('.thumbPicBox').remove();
+	$('#img').val("");
+	$('#img').attr("_value","");
+	$('.upimgbtn').html('<span>上传图片</span>');
+}
+function uppick(){
+	uexWindow.cbActionSheet = uPpickcbSuccess;
+	var as=['拍照','从手机相册选择'];
+	uexWindow.actionSheet('','取消',as);
+	//uexImageBrowser.pick();
+}
+function uPpickcbSuccess(opId,dataType,data){
+		if(data==0){
+			uexCamera.open();
+			
+		}else if(data == 1){
+			uexImageBrowser.pick();
+		}
+}
+    </script>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>
+    </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" href="css/ui-tab.css">
+        <link rel="stylesheet" href="css/ui-base.css">
+        <link rel="stylesheet" href="css/ui-box.css">
+        <link rel="stylesheet" href="css/ui-color.css">
+		<link rel="stylesheet" href="css/ui-res.css">
+		<link rel="stylesheet" href="css/ui-365.css">
+        <script src="js/zy_control.js"></script>
+        <script src="js/zy_click.js"></script>
+		<script src="js/beihai365_comman.js"></script>
+		<script src="js/zepto.min.js">
+    	</script>
+    </head>
+    <body class="um-vp c-wh" ontouchstart>
+        <div id="page_0" class="up ub ub-ver" tabindex="0">
+			<div id="header" class="uh c-m15 t-wh ub head_top_home">
+				<div class="list_quxiao" onclick="fanhui();"></div>
+                <h1 id="form_name" class="ub-f1 ulev5 ut-s tx-c" tabindex="0">发帖</h1>
+				<div class="list_re_btn tx-c list_re_btn_hui" id="list_re_btn_hui" ><span class="f14">发布</span></div>
+				<div class="list_re_btn tx-c" id="list_re_btn" onclick="post()" style="display:none;"><span class="f14">发布</span></div>
+			</div>
+            <!--header结束-->
+			<!--content开始-->
+            <div id="content" class="ub-f1 tx-l t-bla ub-img6" style="">
+            </div>
+            <!--content结束-->	
+        </div>
+    </body>
+    <script>
+        zy_init();
+		window.uexOnload = function(type){
+            if (!type) {
+				uexWindow.setBounce("0");
+				if (uexWidgetOne.iOS7Style) {
+				    
+                    $("#header").addClass('ios7');   
+                }
+                
+				uexWindow.onKeyPressed = onKeyPressed;
+				//设置拦截back键
+				uexWindow.setReportKey('0', '1');
+                zy_con("content", "replies_content.html", 0, $$("header").offsetHeight);
+				LoadTitle();
+				//uexWindow.showSoftKeyboard();
+				
+            }
+			window.onorientationchange=window.onresize=function()
+			{
+				zy_resize("content",0,$$("header").offsetHeight);				
+			}
+        }
+		function LoadTitle(){
+			if(localStorage.floorac == 'yinyong'){
+				$("#form_name").html("回复-"+localStorage.lou+"楼")
+			}else if(localStorage.floorac == 'chahua'){
+				$("#form_name").html("插话-"+localStorage.lou+"楼（"+localStorage.louzz+"）")
+			}else if(localStorage.floorac == 'bianji'){
+				$("#form_name").html(""+localStorage.lou+"楼（"+localStorage.username+"）")
+			}else{
+				$("#form_name").html("回帖（"+localStorage.username+"）")
+			}
+		}	
+//弹出提示框		
+	function openBC(){
+		var value = "保存;不保存";
+		uexWindow.cbActionSheet = actionSheetSuccess;
+		var mycars=value.split(";");
+		uexWindow.actionSheet("","取消",mycars);
+	}
+	function actionSheetSuccess(opId, dataType, data){
+		if(data == '0'){
+			localStorage.tmp_read_switch = "yes";
+			close_window();
+		}else if(data == '1'){
+			localStorage.tmp_read_switch = "no";
+			close_window();
+		}else{
+			
+		}
+	}
+//提示框结束		
+		function post(){
+			uexWindow.evaluatePopoverScript("replies","content","xmlHttpPost()");
+		}
+		function onKeyPressed(keyCode){
+			fanhui();
+		}
+		function fanhui(obj){
+			close_window();	
+		}
+
+		function PostBtnShow(obj){
+			if(obj== 'ok'){
+				$("#list_re_btn").hide();
+				$("#list_re_btn_hui").show();
+			}else{
+				$("#list_re_btn").show();
+				$("#list_re_btn_hui").hide();
+			}
+		}
+    </script>
+</html>

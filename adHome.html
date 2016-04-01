@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html class="um">
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" href="css/ui-base.css">
+        <link rel="stylesheet" href="css/ui-box.css">
+        <link rel="stylesheet" href="css/ui-color.css">
+        <link rel="stylesheet" href="css/ui-res.css">
+        <link rel="stylesheet" href="css/ui-365.css">
+        <script src="js/zy_control.js"></script>
+        <script src="js/zy_tmpl.js"></script>
+        <script src="js/swipe.min.js"></script>
+        <script src="js/beihai365_comman.js"></script>
+        <script src="js/beihai365_global.js"></script>
+        <script src="js/zepto.min.js"></script>
+
+    </head>
+    <body class="um-vp c-wh" ontouchstart>
+        <div id="page_0" class="up ub ub-ver" tabindex="0">
+            <div  class="adViewBg"></div>
+            <div class="adView"></div>
+            <div class="AdClose" onclick="uexWindow.closePopover('adHome')">
+                <span class="AdCloseText">点击跳过<span id="AdCloseTextTime"></span></span>
+            </div>
+        </div><!--content结束--><!--footer开始-->
+        </div>
+
+    </body>
+    <script>
+        zy_init();
+        var _cache_main = new Array();
+        var slider = '';
+
+        window.uexOnload = function(type) {
+            if (!type) {
+                if (uexWidgetOne.iOS7Style) {
+                    
+                    $(".AdCloseText").css({"margin-top":"1.5rem"});
+                }
+
+                localStorage.returnType = 'AdHome';
+                uexWindow.setBounce("0");
+                uexWindow.resetBounceView("0");
+                uexWindow.resetBounceView("1");
+
+                // console.log(data)
+                //alert(localStorage.getItem("adData"))
+                //var reData 
+                if(!localStorage.reforadData){
+                    localStorage.reforadData = localStorage.getItem("adData");
+                }
+                //alert(localStorage.reforadData +"和"+localStorage.getItem("adData"))
+                var data = JSON.parse(localStorage.getItem("reforadData"));
+                var obj = new Image();
+                obj.src = data.img;
+                obj.onload = function() {
+                    //alert('图片的宽度为：' + obj.width + '；图片的高度为：' + obj.height);
+                    var adHtml = '<img src="' + data.img + '" width="100%">'
+                    $(".adView").html(adHtml).css({
+                        "background-color" : "#" + data.bgcolor
+                    }).click(function() {
+                        localStorage.reforadData = localStorage.getItem("adData");
+                        openbrower(data.url);
+                        uexWindow.closePopover('adHome');
+
+                    });
+                    //加载完，4秒后关闭定时器
+                    colseAd(8);
+                }
+            }
+        }
+        function colseAd(num) {
+            var timer = setInterval(function() {
+                num--;
+                $("#AdCloseTextTime").html("(" + num + ")");
+                if (num == 0) {
+                    clearInterval(timer);
+                    localStorage.reforadData = localStorage.getItem("adData");
+                    uexWindow.closePopover('adHome');
+                }
+            }, 1000);
+
+        }
+
+        function tapTms(t) {
+            var _this = $(t);
+            var tid = _this.attr("tid");
+            var subject = _this.attr("subject");
+            var hits = _this.attr("hits");
+            var page_account = _this.attr("page_account");
+            var replies = _this.attr("replies");
+            var fname = _this.attr("fname");
+            var fid = _this.attr("fid");
+
+            //首页进入标注
+            localStorage.ismain = true;
+
+            LS.posts({
+                'fid' : fid,
+                'form_name' : fname
+            });
+
+            open_detail(tid, 0, page_account, subject, hits, replies);
+        }
+
+        /**
+         *
+         * @param {Object} p
+         * index.html "首页"调用
+         */
+        function _slide() {
+            slider && slider.slide(0, 0);
+        }
+
+        /**
+         *
+         */
+
+        /**
+         * 详细内容
+         * @param {Object} tmsgs_id
+         * @param {Object} p
+         * @param {Object} page_account
+         * @param {Object} subject
+         * @param {Object} hits
+         * @param {Object} replies
+         */
+        function open_detail(tmsgs_id, p, page_account, subject, hits, replies) {
+
+            LS.posts({
+                'tid' : tmsgs_id,
+                'p' : p == 0 ? 1 : p,
+                'page_account' : page_account == 0 ? 1 : page_account,
+                'subject' : decodeURIComponent(subject),
+                'hits' : hits,
+                'replies' : replies
+            });
+            newOpenWin('reads', "read.html");
+        }
+    </script>
+</html>

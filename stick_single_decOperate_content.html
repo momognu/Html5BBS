@@ -1,0 +1,264 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1.0, user-scalable=no" />
+        <link rel="stylesheet" href="css/ui-tab.css">
+        <link rel="stylesheet" href="css/ui-base.css">
+        <link rel="stylesheet" href="css/ui-box.css">
+        <link rel="stylesheet" href="css/ui-color.css">
+        <link rel="stylesheet" href="css/ui-res.css">
+        <link rel="stylesheet" href="css/ui-365.css">
+        <link rel="stylesheet" href="css/ui-single.css">
+        <script src="js/jquery-2.0.3.min.js"></script>
+        <script src="js/beihai365_comman.js"></script>
+        <script src="js/beihai365_global.js"></script>
+        <script src="js/laytpl.js"></script>
+        <script src="js/iscroll.js"></script>
+        <script src="js/iscrollAssist.js"></script>
+        <script src="js/share_read.js"></script>
+    </head>
+    <!-- 贴单详情  列表-->
+
+    <body class="bg365 um-vp" style="">
+
+        <section class="head_single" id="head-single">
+
+        </section>
+
+        <section class="single_dec_ul">
+            <ul id="creatHtml">
+                
+            </ul>
+        </section>
+
+        <!-- 操作 -->
+        <section class="poule_bg hide js-pouple">
+            <ul class="pouple_ul js-operation">
+                <li data-operation="edit">
+                    编辑
+                </li>
+                <li data-operation="del">
+                    删除
+                </li>
+            </ul>
+        </section>
+
+        <!-- 操作 -->
+        <section class="poule_bg hide js-pouple-del poule_bg_ab">
+            <div class="js-del-wap del_wap">
+                <h1 class="del_h1 js-del-title">删除帖单</h1>
+                <p class="c_grey_66 f16 js-del-desc">
+                    确定要删除该帖单么？
+                </p>
+                <div class="ub del_text">
+                    <p class="ub-f1 js-true-btn">
+                        删除
+                    </p>
+                    <p class="ub-f1 js-close">
+                        取消
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <script>
+        
+            var uid = localStorage.uid,
+                cid = localStorage.singleCid;
+
+            //用于存储
+            var htmlHead = localStorage.decHtml;
+            var decMian = localStorage.decMian;
+
+            //把缓存的内容放进来
+            $('#head-single').html(htmlHead);
+            $('#creatHtml').html(decMian);
+
+            $('.js-edit-btn,.js-all-oper').removeClass('hide');
+            $('.js-set-btn,.js-share-btn').addClass('hide');
+
+            ;(function() {
+
+                window.uexOnload = function() {
+                    if (uexWidgetOne.iOS7Style) {
+
+                        $("#header").css({
+                            "padding-top" : "1.25rem"
+                        });
+                        $(".header_single").css({
+                            "padding-top" : "1.25rem"
+                        });
+                    }
+
+                    //监听侧滑
+                    uexWindow.onSwipeRight = function() {
+                        //uexWindow.evaluateScript("single-decOperate", 0, "uexWindow.close('-1');");
+                    }
+                    intfun();
+                }
+                function intfun() {
+
+                    //其它事件
+                    var delarray = {
+                        delpaste : {
+                            'title' : '删除贴子',
+                            'describe' : '确定要删除该帖子么？',
+                            'posturl' : '/index.php?c=threadslist&do=del_post'
+                        },
+                        delsingle : {
+                            'title' : '删除帖单',
+                            'describe' : '确定要删除该帖单么？',
+                            'posturl' : '/index.php?c=threadslist&do=del_collection'
+                        }
+
+                    }
+
+                    var delfun = function(sign, tid, that) {
+                        var onedata = delarray[sign];
+                        $('.js-del-title').html(onedata.title);
+                        $('.js-del-desc').html(onedata.describe);
+
+                        var st = $(window).scrollTop();
+                       
+                        var winh =  $(window).height();
+                        var h = $('html').height();
+                        
+                        if(winh > h){
+                            h = winh;
+                        }
+                        
+                        $('.js-pouple-del').height(h).removeClass('hide');
+                        $('.js-del-wap').css('top', st + ~~(winh/3));
+                        
+                        //$('.js-pouple-del').removeClass('hide')
+                        //$('.js-del-wap').css('top', st);
+                        
+                        
+                        ifnomeove = true;
+                        
+                        var posturl = reLink(onedata.posturl + '&cid=' + cid + '&tid=' + tid + 'id&category=0');
+
+
+                        $('.js-true-btn').bind('click', function() {
+                            AJAX.get(posturl, function(data) {
+                                var data = JSON.parse(data);
+                                
+                                console.log('data');
+                                if (data.result == 'success') {
+                                    refreshDec();
+                                    uexWindow.toast("0", "5", '删除成功', "2000");
+                                    that.parents('li').remove();
+                                    $('.js-pouple-del').addClass('hide');
+                                    
+                                    ifnomeove = false;
+                                } else {
+                                    uexWindow.toast("0", "5", data.msg, "2000");
+
+                                }
+                            }, function() {
+                                alert('数据获取失败');
+                            })
+                        })
+                    }
+                    //编辑自己的帖单，删除帖子
+                    $('.js-del-paste').click(function(e) {
+                        e.stopPropagation();
+                        var that = $(this);
+                        var tid = that.parents('.js-all-oper').attr('data-tid');
+
+                        delfun('delpaste', tid, that);
+                    })
+                    
+                    //置顶
+                    $('.js-stick-btn').click(function() {
+                        var that = $(this);
+                        var tid = that.parents('.js-all-oper').attr('data-tid');
+                        var stick = '/index.php?c=threadslist&do=posts_top&cid=' + cid + '&category=0&tid=' + tid;
+                        stick = reLink(stick);
+
+                        AJAX.get(stick, function(data) {
+                            var data = JSON.parse(data);
+                            console.log(data);
+                            if (data.result == 'success') {
+                                $('#creatHtml').prepend(that.parents('li'));
+                                refreshDec();
+                                uexWindow.toast("0", "5", '置顶成功', "2000");
+                            } else {
+                                uexWindow.toast("0", "5", data.msg, "2000");
+                            }
+                        }, function() {
+                            alert('数据获取失败');
+                        })
+                    })
+                    //编辑标题
+                    $('.js-edit-btn').click(function() {
+                        var cid = $(this).attr('data-colleid');
+                        var title = $(this).attr('data-title');
+
+                        localStorage.singleCid = cid;
+                        localStorage.ifedit = 'edit';
+                        localStorage.titleName = title;
+                        localStorage.uid = uid;
+                        newOpenWin('single-title', 'stick_single_title.html');
+
+                    })
+                    
+                    //取消事件
+                    $('.js-close,.js-pouple,.js-pouple-del').click(function() {
+                        var per = $(this).parents('.js-pouple-del').length != 0 ? $(this).parents('.js-pouple-del') : $(this);
+                        per.addClass('hide');
+                        $('.js-true-btn').unbind('click');
+                        ifnomeove = false;
+                    })
+                }
+                
+                
+                // 以下主要用来消除沙发里浏览器的滚动事件
+                $('body').bind('touchmove', function(e) {
+                    if (ifnomeove) {
+                        e.preventDefault();
+                    }
+                });
+                
+            })();
+            
+            
+            
+            //来自父窗口的点击
+            function _setBtn(h) {
+                var st = $(window).scrollTop();
+                $('.js-pouple-del').height(h).removeClass('hide').css();
+                ifnomeove = true;
+            }
+            
+            
+            function openMySingleDec(tidsing) {
+                uexWindow.toast("0", "5", '您目前处于编辑状态，无法跳转哦', "3000");
+            }
+
+            function refreshDec() {
+                var reName = ("single-dec" + localStorage.tiedanDecWindowId);
+                uexWindow.evaluateScript(reName, 0, "onloadHtml.createHtml()");  
+            }
+
+            function editTitle(text) {
+                
+                $('.js-edit-title').html(text);
+                $('.js-edit-btn').attr('data-title',text);
+                uexWindow.evaluateScript("single-list", 0, "onloadHtml.createHtml()");
+
+                //预防其它途径进来的列表没有更新
+                var reName = ("single-list" + localStorage.tiedanWindowId);
+
+                uexWindow.evaluateScript(reName, 0, "window.location.reload();");
+            }
+
+
+
+
+
+        </script>
+    </body>
+</html>

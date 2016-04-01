@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" href="css/ui-tab.css">
+        <link rel="stylesheet" href="css/ui-base.css">
+        <link rel="stylesheet" href="css/ui-box.css">
+        <link rel="stylesheet" href="css/ui-color.css">
+        <link rel="stylesheet" href="css/ui-res.css">
+        <link rel="stylesheet" href="css/ui-365.css">
+        <script src="js/zy_control.js"></script>
+        <script src="js/beihai365_comman.js"></script>
+        <script src="js/beihai365_global.js"></script>
+        <script src="js/zepto.min.js"></script>
+    </head>
+    <body class="um-vp c-wh" ontouchstart>
+        <div id="page_0" class="up ub ub-ver" tabindex="0">
+
+            <!--header开始-->
+            <div id="header">
+                <div  id="header_top" class="uh t-wh ub header-for-index color-m1">
+                    <div id="left_btn" style="display: none;"></div>
+                    <h1 id="form_name" class="ub-f1 ulev5 ut-s tx-c" layerkey="pindaolist"><span class="indexSo" onclick="openSearch()"></span></h1>
+                    <div id="right_btn" class="saoyisao" fn="index" onclick="topbar_right(this);"></div>
+                </div>
+            </div>
+            <!--header结束-->
+            <!--content开始-->
+            <div id="content" class="ub-f1 tx-l t-bla ub-img100"></div>
+
+            <!--content结束-->
+            <!--footer开始-->
+            <div id="footer" class="uf c-m14 t-wh">
+                <div class="footer_365">
+                    <!--工具栏开始-->
+                    <div class="ub tool_icon">
+                        <div class="ub-f1 tx-c hti-7-0 cur_bg_btn cur_color" iconsn="0" style="background-image: url(css/img/new201501/icon_0_hover.png)" ontouchstart="zy_touch('click_opacity')" onclick="index_btn(this,'11');">
+                            <span class="f12 tool_text cur">首页</span>
+                        </div>
+                        <div class="ub-f1 tx-c hti-7-1 cur_bg_btn pr" iconsn="1" ontouchstart="zy_touch('click_opacity')" onclick="index_btn(this,'10');">
+                            <span class="f12 tool_text cur">看帖</span>
+                            <span class="redDian" id="redDian"></span>
+                        </div>
+                        <div class="ub-f1 tx-c hti-7-2 cur_bg_btn" iconsn="2" ontouchstart="zy_touch('click_opacity')" onclick="index_btn(this,'6');">
+                            <span class="f12 tool_text cur">论坛</span>
+                        </div>
+                        <div class="ub-f1 tx-c hti-7-3 cur_bg_btn" iconsn="3" ontouchstart="zy_touch('click_opacity')" onclick="index_btn(this,'7');">
+                            <span class="f12 tool_text cur">我的</span>
+                        </div>
+                        <div class="ub-f1 tx-c hti-7-4 cur_bg_btn" iconsn="4" ontouchstart="zy_touch('click_opacity')" onclick="index_btn(this,'2');">
+                            <span class="f12 tool_text cur">更多</span>
+                        </div>
+                    </div>
+
+                    <!--工具栏结束-->
+                </div>
+            </div>
+
+            <!--footer结束-->
+
+        </div>
+    </body>
+    <script src="js/zepto.min.js"></script>
+    <script>
+        zy_init();
+        var isTimer = null;
+        var isTimerData = "0";
+
+        var $winWidth,
+            $winHeight,
+            $headHeight,
+            $footHeight;
+
+        var $x,
+            $y,
+            $w,
+            $h;
+
+        window.uexOnload = function(type) {
+            uexScanner.cbOpen = ScannerSuccessCallBack;
+            if (!type) {
+                //初始化窗口自增ID
+                localStorage.detailWindowId = 0;
+                localStorage.listWindowId = 0;
+                localStorage.pindaoWindowId = 0;
+                localStorage.tiedanWindowId = 0;
+                localStorage.tiedanDecWindowId = 0;
+
+                $(function() {
+                    init();
+                });
+                //禁止滚动
+                uexWindow.setBounce("0");
+                app_update(false);
+                //自升级
+                //第一次启动
+                if (!localStorage.pattern || !localStorage.myIndex) {
+                    localStorage.pattern = 'small_pic';
+                }
+                //启动给小红点
+                redDian("1");
+
+                getInfo(); //获取手机信息
+                //本地没有的内容放在最后加载
+                //isEnd();
+            }
+            window.onorientationchange = window.onresize = function() {
+                $winWidth = $(window).width();
+                $winHeight = $(window).height();
+                $headHeight = $("#header").height();
+                $footHeight = $("#footer").height();
+            }
+        }
+        function init() {
+
+            if (uexWidgetOne.iOS7Style) {
+                uexWindow.setStatusBarTitleColor(1);
+                $("#header").prepend('<div id="iPhoneBar" class="iPhoneBar iPhoneBarpindaolist"></div>');
+            }
+
+            localStorage.returnType = 'index';
+            //来路，登陆使用
+
+            //获取宽度
+            $winWidth = $(window).width();
+            $winHeight = $(window).height();
+            $headHeight = $("#header").height();
+            $footHeight = $("#footer").height();
+
+            //xywh
+            $x = 0,
+            $y = parseInt($headHeight),
+            $w = 0,
+            $h = parseInt($winHeight - $headHeight - $footHeight);
+
+            //定义ID
+            localStorage.urlType = 15;
+            loadView();
+
+            //启动广告
+            if ( localStorage.v15 ) {
+                    //uexWindow.openPopover("start", 0, "start.html", '', 0, 0, 0, 0, '', 0, 0);
+            } else {
+                //alert(localStorage.getItem("adData"))
+                if (JSON.parse(localStorage.getItem("adData"))) {
+                    if (JSON.parse(localStorage.getItem("adData")).msg == "yes") {
+                        uexWindow.openPopover("adHome", 0, "adHome.html", "", 0, 0, '', '', '', 0, 0);
+                    }
+                }
+            }
+            loadAd();
+            //加载广告
+        }
+
+        function motaiYindao() {
+            uexWindow.openPopover("start_mt", 0, "start_mt.html", '', 0, 0, 0, 0, '', 0, 0);
+        }
+
+        function loadAd() {
+            $.getJSON("http://tools.beihai365.com/beihai365_app_ad/index.php?c=ad_get&m=get_ad&group=0&jsoncallback=?" + "&version=" + version, function(data) {
+                if (data) {
+                    localStorage.setItem("adData", JSON.stringify(data));
+                }
+            })
+        }
+
+        function loadEnd() {
+        }
+
+        function loadView() {
+            zy_con("content", "pindaolist.html", 0, $$("header").offsetHeight);
+        }
+
+        /*********看帖页面处理*******/
+        //全局定时器
+        var TipsTimer = null;
+        //存储的时间，第一次给它一个非常大的值为的是获取数据为0
+        if (!localStorage.NewTipsTime) {
+            localStorage.NewTipsTime = '314159265358979323846';
+            //就在一千年以后
+        }
+        function setNewTips() {
+            $.getJSON(reLink("/index.php?jsoncallback=?&version=13&c=threads&m=newthreads&refreshtime=" + localStorage.NewTipsTime), function(data) {
+                if (data.resutlt.num == 0) {
+                    redDian("0");
+                    isTimerData = 0;
+                } else {
+                    redDian("1");
+                    clearInterval(TipsTimer);
+                    // 有数据了就关闭定时器
+                    isTimerData = 1;
+                };
+            })
+        }
+
+        function OpenNewTips() {
+            TipsTimer = setInterval("setNewTips()", 1000 * 10);
+            //1000为1秒钟,设置为1分钟。
+        }
+
+        function redDian(a) {
+            var rd = $("#redDian");
+            if (a == 1) {
+                rd.show();
+            } else {
+                rd.hide();
+            }
+        }
+
+        function colseNewTips() {
+            clearInterval(TipsTimer);
+        }
+
+        /**************/
+        var $layerKey;
+        //根据来路拼装TOP
+        function index_btn(t, key) {
+            if (isTimer) {
+                colseNewTips();
+                OpenNewTips();
+                //alert();
+                //关闭模态层
+                localStorage.KantieOpenBox = "1";
+            }
+            var name = '';
+            var lb = $("#left_btn");
+            var rb = $("#right_btn");
+            lb.removeClass().html('').show();
+            rb.removeClass().html('').show();
+            lb.removeAttr('fn');
+            rb.removeAttr('fn');
+
+            $header_top = $("#header_top");
+
+            btnView(t);
+            if (uexWidgetOne.iOS7Style) {
+
+            }
+            if (key == 2) {
+
+                $header_top.removeClass("color-m1");
+                $header_top.addClass("color-m2");
+                name = "更多";
+                $layerKey = "more";
+                //uexWindow.setSelectedPopOverInMultiWindow('all',4);
+
+            } else if (key == 6) {
+                $header_top.removeClass("color-m1");
+                $header_top.addClass("color-m2");
+                name = "论坛"
+                $layerKey = "bbs_list";
+                //uexWindow.setSelectedPopOverInMultiWindow('all',2);
+            } else if (key == 7) {
+
+                $header_top.removeClass("color-m1");
+                $header_top.addClass("color-m2");
+                uexWindow.bringPopoverToFront("me_index");
+                name = '我的365';
+                $layerKey = "me_index";
+                //uexWindow.setSelectedPopOverInMultiWindow('all',3);
+
+            } else if (key == 10) {
+                $header_top.removeClass("color-m1");
+                $header_top.addClass("color-m2");
+                name = "看帖";
+                $layerKey = "kantie";
+                //打开小红点提示
+                colseNewTips();
+                //点击进去频道就关了定时器
+                isTimer = true;
+
+                //消灭小红点
+                redDian("0");
+                //有数据给它拉数据
+                localStorage.TimerLoad = isTimerData;
+                localStorage.isloadpost = "1" //点击加载回复和缓冲数据
+                //uexWindow.setSelectedPopOverInMultiWindow('all',1);
+
+            } else if (key == 11) {
+                localStorage.urlType = 15;
+                if (uexWidgetOne.iOS7Style) {
+
+                }
+                $layerKey = "pindaolist";
+                $header_top.removeClass("color-m2");
+                $header_top.addClass("color-m1");
+                lb.hide();
+                name = '<span style="color: #fff;margin:.5rem .5rem 0 .625rem; display:  block" onclick="openSearch()" title="北海365网"><img src="css/img/seach/soPic.png" width="100%"></span>';
+                rb.attr({
+                    "fn" : "index"
+                })
+                rb.addClass('saoyisao');
+                //uexWindow.setSelectedPopOverInMultiWindow('all',0);
+            }
+            $("#iPhoneBar").removeClass();
+            $("#iPhoneBar").addClass("iPhoneBar iPhoneBar" + $layerKey);
+
+            localStorage.indexLayerKey = $layerKey;
+            //使用getLayer预防返回undefined
+            zy_con("content", localStorage.indexLayerKey + ".html", 0, $$("header").offsetHeight);
+            $("#form_name").html(name).attr({
+                "layerKey" : $layerKey
+            });
+        }
+
+        function getLayer(key) {
+            var item = localStorage.getItem(key);
+            if (item == '' || item == null || typeof (item) == "undefined") {
+                return "pindaolist";
+            } else {
+                return item;
+            }
+        }
+
+        function login(s) {
+            if (s == "more") {
+                zy_con("content", "more.html", 0, $$("header").offsetHeight);
+            } else if( s == 'bbs_list'){
+                zy_con("content", "bbs_list.html", 0, $$("header").offsetHeight);
+            }else{
+                zy_con("content", "me_index.html", 0, $$("header").offsetHeight);
+            }
+        }
+    
+        function topbar_right(t) {
+            var isif = $(t).attr("fn");
+            if (isif == "index") {
+                //var ScannerJSON = '{"lineImg":"res://scannerLine.png","pickBgImg":"res://scannerBg.png","tipLabel":"将方框对准二维码/条形码，即可自动扫描","title":"扫描二维码/条形码"}';
+                uexScanner.open();
+                //uexScanner.setJsonData(ScannerJSON);
+
+            }
+        }
+
+        function btnView(t) {
+            var isn = $(t).attr("iconsn");
+            $(".cur_bg_btn").attr("style", "");
+            $(t).css({
+                "background-image" : "url(css/img/new201501/icon_" + isn + "_hover.png)"
+            });
+            $(".cur_bg_btn").removeClass("cur_color");
+            $(t).addClass("cur_color");
+        }
+        /*
+                        跳转到搜索
+         * */
+        function openSearch(){
+            openWindow.select('4','','');
+        }
+
+        function ScannerSuccessCallBack(opCode, dataType, data) {
+            var obj = eval('(' + data + ')');
+            var reCode = obj.code;
+            if (isHttp(reCode)) {
+                if (isTaobeihai(reCode).length <= 6) {
+                    openUrl("http://taobeihai.com/baobei.php?id=" + isTaobeihai(reCode))
+                } else if (is365(reCode).length <= 8) {
+                    openWindow.select('3', is365(reCode));
+                } else {
+                    openbrower(reCode);
+                }
+            }
+        }
+
+        function isHttp(obj) {
+            if (obj.indexOf("http://") == 0 || obj.indexOf("https://") == 0) {
+                return true;
+            }
+            return false;
+        }
+
+        function isTaobeihai(obj) {
+            if (obj.indexOf("taobeihai.com") > 0) {
+                if (obj.indexOf("baobei") > 0) {
+                    return obj.replace(/([^?]+)taobeihai.com([^?]+)\?([^=]+)=([^?]+)/gi, '$4');
+                } else if (obj.indexOf("item") > 0) {
+                    return obj.replace(/([^?]+)taobeihai.com([^?]+)\/([^?]+)\.html/gi, '$3');
+                } else {
+                    return false;
+                }
+            }
+            return false;
+        }
+
+        function is365(obj) {
+            if (obj.indexOf("beihai365.com") > 0) {
+                if (obj.indexOf("read") > 0) {
+                    return obj.replace(/([^?]+)beihai365.com([^?]+)\?([^=]+)=([^?]+)/gi, '$4');
+                } else if (obj.indexOf("/t/") > 0) {
+                    return obj.replace(/([^?]+)beihai365.com([^?]+)\/([^?]+)/gi, '$3');
+                } else {
+                    return false;
+                }
+            }
+            return false;
+        }
+        
+        
+        function loginCallback(){
+            uexWindow.evaluateScript("login", 0, "colse();");
+            console.log(localStorage.rootType)
+            if( localStorage.rootType == 'bbs_list'){
+                login('bbs_list');
+                localStorage.removeItem('rootType');
+            }else{
+               login('me_index'); 
+            }
+            
+        }
+        
+    </script>
+</html>

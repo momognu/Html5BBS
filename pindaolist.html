@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html class="android">
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" href="css/ui-input.css">
+        <link rel="stylesheet" href="css/ui-base.css">
+        <link rel="stylesheet" href="css/ui-box.css">
+        <link rel="stylesheet" href="css/ui-color.css">
+        <link rel="stylesheet" href="css/ui-365.css">
+        <style>
+            html, body {
+                overflow-x: hidden;
+            }
+        </style>
+        <script src="js/zy_control.js"></script>
+        <script src="js/beihai365_comman.js"></script>
+        <script src="js/beihai365_global.js"></script>
+        <script src="js/zepto.min.js"></script>
+    </head>
+
+    <body class="um-vp  m2-homeNewbg">
+        <div id="page_0" class="up ub ub-ver" tabindex="0">
+
+            <div id="modelView"></div>
+            <div id="listView"></div>
+            <div id="index_content"></div>
+        </div>
+    </body>
+
+    <script>
+
+        window.uexOnload = function(type) {
+            if (!type) {
+                uexWindow.setBounce(0);
+                uexWindow.hiddenBounceView(0);
+                uexWindow.hiddenBounceView(1)
+                localStorage.returnType = "pindao"
+
+                init();
+                getData();
+                var $winName = ("pindao" + localStorage.pindaoWindowId);
+                if (localStorage.urlType != 15) {
+                    //监听侧滑
+                    uexWindow.onSwipeRight = function() {
+                        //uexWindow.evaluateScript($winName, 0, "closeWin();");
+                    }
+                }
+                //启用统计
+                isMTA("pindao-" + localStorage.urlType);
+            }
+        }
+        function init() {
+            //设置标题
+            lodding.show();
+        }
+
+        //获取数据
+        function getData() {
+            console.log(reLink('/index.php?c=threads&m=channel&cid=' + parseInt(localStorage.urlType)))
+            AJAX.get(reLink('/index.php?c=threads&m=channel&cid=' + parseInt(localStorage.urlType)), function(res) {
+                localStorage.setItem("reClassListData", res);
+                console.log('返回的数据'+res);
+                //console.log(localStorage.getItem("reClassListData"))
+                getView();
+            });
+        }
+        
+
+        
+        //加载整个模块
+        function getView() {
+
+            //转换JSON
+            var data = JSON.parse(localStorage.getItem("reClassListData"));
+            console.log(data);
+            //加载列表数据
+            for (var j in data.forums) {
+                console.log(data.forums[j])
+                //1、加载标题
+                var re = data.forums[j];
+                //其他所有模型
+                if (re.contentlist) {
+                    mode.view(re);
+                }
+            }
+
+            //数据列表
+            if (data.result) {
+                mode.listView(data);
+            }
+
+            lodding.hide();
+        }
+
+        function reViewbgc(s) {
+            if (parseInt(s) <= 50) {
+                s = 'youbgc'
+            } else if (parseInt(s) <= 100) {
+                s = 'liangbgc'
+            } else {
+                s = 'chabgc'
+            }
+            return s;
+        }
+
+        function reViewText(s) {
+            if (parseInt(s) <= 50) {
+                s = '优'
+            } else if (parseInt(s) <= 100) {
+                s = '良'
+            } else {
+                s = '差'
+            }
+            return s;
+        }
+
+        function reWeather(s) {
+            return s;
+        }
+
+        /*模块类型（重构）*/
+        var $modelView = $("#modelView");
+        var mode = {
+            view : function(d) {
+                var data = d.contentlist;
+                var tpl = d.fname;
+
+
+                //var weatherData = d.data;
+                switch(tpl) {
+                case "ModelA":
+                    if (data.length > 0) {
+                        var maHtml = '';
+                        maHtml += '<div class="ModelNode">' + '<div class="Model">' + '<div class="Modelbox ModelA">';
+                        for (var i = 0; i < data.length; i++) {
+                            var re = data[i];
+                            maHtml += '<div class="Pane" onclick="openWindow.select(\'' + re.urltype + '\',\'' + re.url + '\',\'' + reSec(re.sec_url) + '\')">' + '<div class="Paneborder">' + retoubuIcon(re.defaulticon, re.icon) + '<span class="PaneText">' + re.name + '</span>' + '</div>' + '</div>';
+                        };
+                        maHtml += '</div>' + '<div class="c"></div>' + '<div class="Panehr"></div>' + '<div class="PanehrTop"></div>' + '</div>' + '</div>';
+
+                        $modelView.append(maHtml);
+                    }
+                    break;
+                case "ModelZ":
+                    //为A的变形金刚
+                    if (data.length > 0) {
+                        var maHtml = '';
+                        maHtml += '<div class="ModelNode">' + '<div class="Model">' + '<div class="Modelbox ModelZ">';
+                        for (var i = 0; i < data.length; i++) {
+                            var re = data[i];
+                            maHtml += '<div class="Pane" onclick="openWindow.select(\'' + re.urltype + '\',\'' + re.url + '\',\'' + reSec(re.sec_url) + '\')">' + '<div class="Paneborder">' + retoubuIcon(re.defaulticon, re.icon) + '<span class="PaneText">' + re.name + '</span>' + '</div>' + '</div>';
+                        };
+                        maHtml += '</div>' + '<div class="c"></div>' + '<div class="Panehr"></div>' + '<div class="PanehrTop"></div>' + '</div>' + '</div>';
+                        $modelView.append(maHtml);
+                    }
+                    break;
+                case "ModelB":
+                    if (data.length > 0) {
+                        var mbHtml = '';
+                        mbHtml += '<div class="ModelNode">' + '<div class="Model">' + '<div class="Modelbox ModelB">';
+                        for (var i = 0; i < data.length; i++) {
+                            var re = data[i];
+                            mbHtml += '<div class="Pane" onclick="openWindow.select(\'' + re.urltype + '\',\'' + re.url + '\',\'' + re.sec_url + '\')">' + '<div class="Paneborder">' + retoubuIcon(re.defaulticon, re.icon) + '<span class="PaneText">' + re.name + '</span>' + '</div>' + '</div>';
+                        };
+                        mbHtml += '</div>' + '<div class="c"></div>' + '<div class="Panehr"></div>' + '<div class="PanehrTop"></div>' + '</div>' + '</div>';
+                        $modelView.append(mbHtml);
+                    }
+                    break;
+                case "ModelC":
+                    if (data.length > 0) {
+                        var mcHtml = '';
+                        mcHtml += '<div class="ModelNode">' + '<div class="Model">' + '<div class="Modelbox ModelC">';
+                        for (var i = 0; i < data.length; i++) {
+                            var re = data[i];                          
+                            mcHtml += '<div class="Pane" onclick="openWindow.select(\'' + re.urltype + '\',\'' + re.url + '\',\'' + re.sec_url + '\')">' + '<div class="Paneborder">' + retoubuIcon(re.defaulticon, re.icon) + '<span class="PaneText">' + re.name + '</span>' + '</div>' + '</div>';
+                        };
+                        mcHtml += '</div>' + '<div class="c"></div>' + '<div class="Panehr"></div>' + '<div class="PanehrTop"></div>' + '</div>' + '</div>';
+                        $modelView.append(mcHtml);
+                    }
+                    break;
+                case "ModelD":
+                    if (data.length > 0) {
+                        var mdHtml = '';
+                        mdHtml += '<div class="ModelNode">' + '<div class="Model">' + '<div class="Modelbox ModelD">';
+                        for (var i = 0; i < data.length; i++) {
+                            var re = data[i];
+                            mdHtml += '<div class="Pane" onclick="openWindow.select(\'' + re.urltype + '\',\'' + re.url + '\',\'' + re.sec_url + '\')">' + '<div class="Paneborder">' + retoubuIcon(re.defaulticon, re.icon) + '<span class="PaneText">' + re.name + '<em>' + re.descript + '</em></span>' + '</div>' + '</div>';
+                        };
+                        mdHtml += '</div>' + '<div class="c"></div>' + '<div class="Panehr"></div>' + '<div class="PanehrTop"></div>' + '</div>' + '</div>';
+                        $modelView.append(mdHtml);
+                    }
+                    break;
+                case "ModelMyThead":
+                    var data = d.data;
+                    console.log(data);
+                    if (data && data.length > 0) {
+                        var meHtml = '';
+                        meHtml += '<div class="m2-listView ModelMyThead"><p class="model_h1">'+ d.forum_name +'</p>';
+                        for (var i = 0; i < data.length; i++) {
+                            var re = data[i];
+                            meHtml += '<div class="ListViewItem" onclick="openWindow.select(\'3\',\'' + re.tid + '\',\'' + re.tid + '\')">' + '<h1>' + re.subject + '</h1>' + '<p><span>' + re.forumname + '</span><span>' + re.postdate + '</span></p>' + '<span class="imgBox">' + retoubuIcon(re.defaulticon, re.icon) + '</span>' + '</div>';
+                        }
+                        meHtml += '</div>';
+                        $modelView.append(meHtml);
+                    }
+                    break;  
+                case "ModelE":
+                    if (data.length > 0) {
+                        var meHtml = '';
+                        meHtml += '<div class="m2-listView ModelE"><p class="model_h1">'+ d.forum_name +'</p>';
+                        for (var i = 0; i < data.length; i++) {
+                            var re = data[i];
+                            meHtml += '<div class="ListViewItem" onclick="openWindow.select(\'' + re.urltype + '\',\'' + re.url + '\',\'' + re.sec_url + '\')">' + '<h1>' + re.name + '</h1>' + '<p><span>' + re.descript + '</span><span>' + re.publishdate + '</span></p>' + '<span class="imgBox">' + retoubuIcon(re.defaulticon, re.icon) + '</span>' + '</div>';
+                        }
+                        meHtml += '</div>';
+                        $modelView.append(meHtml);
+                    }
+                    break;               
+                case "ModelF":
+                    if (data.length > 0) {
+                        var meHtml = '';
+                        meHtml += '<div class="listViewImg ModelF">';
+                        for (var i = 0; i < data.length; i++) {
+                            var re = data[i];
+                            meHtml += '<div onclick="openWindow.select(\'' + re.urltype + '\',\'' + re.url + '\',\'' + re.sec_url + '\')">' + '<span class="MFimgBox">' + retoubuIcon(re.defaulticon, re.icon) + '</span>' + '</div>';
+                        }
+                        meHtml += '</div>';
+                        $modelView.append(meHtml);
+                    }
+                    break;
+                case "ModelG":
+                    localStorage.weatherData = JSON.stringify(d.data);
+                    if (d.data) {
+                        var pdata = d.data['pm2.5'];
+                        var wdata = d.data['weather'];
+                        var mgHtml = "";
+
+                        if (wdata.resultcode == 200 && pdata.resultcode == 200) {
+                            mgHtml += '<div class="m2-tianqi">' + '<div class="fl" onclick="newOpenWin(\'weather\', \'weather.html\');">' + '<span class="m2t-a"> ' + wdata.result.sk.temp + '° </span>' + '<span class="m2t-b"> 北海 ' + wdata.result.today.temperature + ' </span>' + '<span class="m2t-c m2t-icon-1"> ' + reWeather(wdata.result.today.weather) + ' </span>' + '</div>' + '<div onclick="newOpenWin(\'pm25\', \'pm25.html\');">' + '<span class="m2t-pm2 ' + reViewbgc(pdata.result[0].citynow.AQI) + '">空气质量:' + pdata.result[0].citynow.AQI + '<span>' + reViewText(pdata.result[0].citynow.AQI) + '</span></span>' + '</div>' + '</div>'
+                        }
+                        $modelView.append(mgHtml)
+                    }
+                    break;
+
+                case  "ModelTitle":
+
+                    if (localStorage.urlType != 15) {
+                        var loadTitie = d.forum_name;
+                        if (loadTitie) {
+                            var reName = ("pindao" + localStorage.pindaoWindowId);
+                            uexWindow.evaluateScript(reName, "0", "setTitleName('" + loadTitie + "');");
+                        }
+                    }
+
+                default:
+                }
+            },
+            listView : function(data) {
+                var resultView = '<div class="mcListView ub-f1 tx-l t-bla ub-img6 kantie" id="mcListView"></div>';
+                $("#index_content").html(resultView);
+                Thread.onload_threads(data);
+            }
+        }
+
+        /*帖子列表类*/
+        //帖子类
+        var Thread = {
+            __load_treads : function(data, success_call) {
+                Thread.onload_view(data, 0, success_call);
+            },
+            onload_view : function(data, viewItem, success_call) {
+
+                var thread_list_tpl = "";
+                //console.log(data.result)
+                for (var i = 0; i < data.result.length; i++) {
+                    var re = data.result[i];
+                    if (re.imgshowtype == 0) {
+                        thread_list_tpl += Thread.showHTMLone(re);
+                    } else if (re.imgshowtype == 2 || re.imgshowtype == 1) {
+                        thread_list_tpl += Thread.showHTMLtwo(re);
+                    } else if (re.imgshowtype == 3) {
+                        thread_list_tpl += Thread.showHTMLthree(re);
+                        ;
+                    }
+                };
+                if (thread_list_tpl == "")
+                    thread_list_tpl = "";
+                //如果没有记录
+
+                success_call(thread_list_tpl);
+
+            },
+            //加载帖子列表
+            onload_threads : function(data) {
+                this.__load_treads(data, function(thread_tpl_data) {
+                    var d = document.createElement("DIV");
+                    d.innerHTML = thread_tpl_data;
+                    $id("mcListView").appendChild(d);
+                });
+            },
+            showHTMLone : function(data) {
+                var rekey = data;
+                var reHTML = "";
+                var isNew = rekey.is_new == 1 ? ' newIcon' : '',
+                    isHot = rekey.digest == 1 ? ' jingIcon' : '',
+                    isJing = rekey.hot == 1 ? ' hotIcon' : '';
+                reHTML += '<section class="has_action' + isNew + isHot + isJing + '">' + '<a href="javascript:zy_touch(\'click_opacity\')" onclick="openWindow.select(3,' + rekey.tid + ')" class="article_link clearfix"> <h3>' + rekey.subject + '</h3>' + '<div class="item_info"> ' + '<span class="src space">' + rekey.form_name + '</span> ' + '<span class="cmt">' + rekey.hits + '/' + rekey.replies + '</span> ' + '<span class="author">' + rekey.author + '</span> ' + '<span class="time fr canhide">' + rekey.postdate + '</span> ' + '</div> </a> ' + '<!--<i class="icon_hot"></i>--> ' + '</section>';
+                return reHTML;
+            },
+            showHTMLtwo : function(data) {
+                var rekey = data;
+                var reHTML = "";
+                var isNew = rekey.is_new == 1 ? ' newIcon' : '',
+                    isHot = rekey.digest == 1 ? ' jingIcon' : '',
+                    isJing = rekey.hot == 1 ? ' hotIcon' : '';
+
+                reHTML += '<section class="middle_mode has_action' + isNew + isHot + isJing + '"> ' + '<a href="javascript:zy_touch(\'click_opacity\')" onclick="openWindow.select(3,' + rekey.tid + ')" class="article_link clearfix" > <h3>' + rekey.subject + '</h3> ' + '<div class="list_img_holder"  style="background-image:url(' + rekey.imgurls[0] + '?imageView/2/w/200)"> ' + '</div> ' + '<div class="item_info"> ' + '<span class="src space">' + rekey.form_name + '</span> ' + '<span class="cmt">' + rekey.hits + '/' + rekey.replies + '</span> ' + '<span class="author">' + rekey.author + '</span> ' + '<span class="time fr canhide">' + rekey.postdate + '</span> ' + '</div> </a> ' + '<!--<i class="icon_hot"></i>--> ' + '</section>';
+                return reHTML;
+            },
+            showHTMLthree : function(data) {
+                var rekey = data;
+                var reHTML = "";
+                var k;
+                var isNew = rekey.is_new == 1 ? ' newIcon' : '',
+                    isHot = rekey.digest == 1 ? ' jingIcon' : '',
+                    isJing = rekey.hot == 1 ? ' hotIcon' : '';
+
+                reHTML += '<section class=" has_action' + isNew + isHot + isJing + '"> ' + ' <a href="javascript:zy_touch(\'click_opacity\')" onclick="openWindow.select(3,' + rekey.tid + ')" class="article_link clearfix"> <h3>' + rekey.subject + '</h3> ' + '<div class="list_image "> ' + '<ul class="clearfix"> ';
+                //for (var i=0; i < rekey.imgurls.length; i++) {
+                for (var k = 0; k < rekey.imgurls.length; k++) {
+                    var imgre = rekey.imgurls[k];
+                    reHTML += '<li>' + '<div class="list_img_holder_large" style="background-image:url(' + imgre + '?imageView/2/w/200)"></div>' + '</li> ';
+                };
+                reHTML += '</ul> ' + '</div> ' + '<div class="item_info"> ' + '<span class="src space">' + rekey.form_name + '</span> ' + '<span class="cmt">' + rekey.hits + '/' + rekey.replies + '</span> ' + '<span class="author">' + rekey.author + '</span> ' + '<span class="time fr canhide" title="2014-12-12 11:24">' + rekey.postdate + '</span> ' + '</div> </a> ' + '</section>';
+                return reHTML;
+            }
+        }
+        function retoubuIcon(s, ss) {
+            var sIMG = "";
+            if (s) {
+                sIMG += '<img src="' + s + '">';
+            } else {
+                sIMG += '<img src="' + ss + '">';
+            }
+            return sIMG;
+        }
+
+        function reSec(s) {
+            if (s) {
+                return s;
+            }
+            return "";
+        }
+    </script>
+</html>

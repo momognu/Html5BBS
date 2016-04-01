@@ -1,0 +1,127 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1.0, user-scalable=no" />
+        <link rel="stylesheet" href="css/ui-tab.css">
+        <link rel="stylesheet" href="css/ui-base.css">
+        <link rel="stylesheet" href="css/ui-box.css">
+        <link rel="stylesheet" href="css/ui-color.css">
+        <link rel="stylesheet" href="css/ui-res.css">
+        <link rel="stylesheet" href="css/ui-365.css">
+        <script src="js/zepto.min.js"></script>
+        <script src="js/md5.js"></script>
+        <script src="js/laytpl.js"></script>
+
+    </head>
+    <body class="um-vp c-wh">
+        <div id="page_0" class="up ub ub-ver " tabindex="0">
+            <script id="weatherHtmlTpl" type="text/html">
+                <div class="fix_topbar_bg {{ reIos() }}"></div>
+                <div id="header" class="fix_topbar {{ reIos() }}">
+                    <div class="uh c-m15 t-wh ub head_top_home fix_topbar_box">
+                        <div class="icon_back" ontouchstart="zy_touch('click_opacity')" onclick="uexWindow.close('-1');"></div>
+                        <h1 id="form_name" class="ub-f1 ulev5 ut-s tx-r" tabindex="0">今日{{ d.result.sk.time }} 发布</h1>
+                        <div class="list_re">
+                            北海
+                        </div>
+                    </div>
+                </div>
+                <!--header结束-->
+                <!--content开始-->
+                <div id="content" class="ub-f1 tx-l t-bla ub-img6 " style="">
+       
+                        <!--文本开始-->
+                        <div class="{{ weatherTpl(d.result.sk.time) }} {{ reIos() }}">
+                            <div class="weather_mian">
+                                <div class="weather_mian_num">
+                                    {{ reImgkey(d.result.sk.temp) }} 
+                                    <img class="weather_mian_num_c" src="css/img/110/number_icon_c.png">
+                                </div>
+                                
+                                <div class="weather_mian_tianqi">
+                                    <strong>{{ d.result.today.weather }}</strong>
+                                    <span>{{ d.result.today.wind }}</span>
+                                </div>
+                                <div class="weather_mian_wendu">
+                                    <span>{{ d.result.today.date_y }}</span>
+                                    <span>{{ d.result.today.temperature }}</span>
+                                </div>
+        
+                            </div>
+                        </div>
+                        <div class="weather_list">
+                            {{# for(var i in d.result.future){ }}
+                                <div class="ub weather_list_loop">
+                                    <div class="weather_list_loop_left ub-f1">
+                                        <span>{{ d.result.future[i].date }} {{ d.result.future[i].week }}</span>
+                                    </div>
+                                    <div class="weather_list_loop_right">
+                                        <strong>{{ d.result.future[i].weather }}</strong>
+                                        <span>{{ d.result.future[i].temperature }}</span>
+                                    </div>
+                                </div>
+                            {{# } }}
+                        </div>
+                </div>
+                </script>
+            <div id="WeatherView"></div>
+            </div>
+        <script type="text/javascript">
+
+            window.uexOnload = function() {
+                if(uexWidgetOne.iOS7Style){
+                    
+                }
+                //获取保存的数据
+                var lsData = localStorage.getItem("weatherData");
+                
+                //经过测试需要进行两次转换，果然惨无人道
+                var data = JSON.parse(lsData)['weather'];
+                
+                //渲染模板
+                var gettpl = document.getElementById('weatherHtmlTpl').innerHTML;
+                laytpl(gettpl).render(data, function(html) {
+                    document.getElementById('WeatherView').innerHTML = html;
+                    //alert(data.resultcode)
+                });
+            }
+            function weatherTpl(a){
+                //alert(a)sourceStr.split(",", maxSplit);
+                if(a.split(":")[0] >= 18){
+                   return 'weather_1'; 
+                }
+                return 'weather';
+            }
+            //图片数组转图片显示
+            function reImgkey(string){
+                var html="",
+                i = 0 ,
+                __string = "";
+                __string = string.split("");
+                for (i = 0; i < __string.length; i++) {
+                    var num = __string[i];
+                    html += numtopic(num);
+                }
+                return html;
+            }
+            function numtopic(num) {  
+                 var html = "";
+                     html += '<img class="weather_mian_num_key" src="css/img/110/number_icon_'+num+'.png">'; 
+                 return html; 
+            }
+            function reIos(){
+                if(uexWidgetOne.iOS7Style){
+                    return "ios7PM25";
+                }
+                return "";
+            }
+             
+            
+
+        </script>
+   
+        
+    </body>
+</html>

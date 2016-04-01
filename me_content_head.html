@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" href="css/ui-base.css">
+        <link rel="stylesheet" href="css/ui-box.css">
+        <link rel="stylesheet" href="css/ui-color.css">
+        <link rel="stylesheet" href="css/ui-res.css">
+        <link rel="stylesheet" href="css/ui-365.css">
+        <script src="js/zy_control.js"></script>
+        <script src="js/zy_tmpl.js"></script>
+        <script src="js/beihai365_comman.js"></script>
+        <script src="js/zy_click.js"></script>
+        <script src="js/beihai365_global.js"></script>
+    </head>
+    <body class="um-vp c-wh" ontouchstart>
+        <div id="page_0" class="up ub ub-ver" tabindex="0">
+            <div id="header">
+                <div class="uh c-m15 t-wh ub head_top_home">
+                    <div class="list_back" ontouchstart="zy_touch('click_opacity')" onclick="uexWindow.close('-1');"></div>
+                    <h1 id="form_name" class="ub-f1 ulev5 ut-s tx-c" tabindex="0"></h1>
+                    <div class="list_re" style="background:none;"></div>
+                </div>
+                <div id="listtopbar" style="display:none;">
+                    <div class="ub head_top_home listtopbar">
+                        <div class="ub-f1 nptopbar_btn" id="tiezi" getname="tiezi">
+                            帖子
+                        </div>
+                        <div class="ub-f1 nptopbar_btn" id="bankuai" getname="bankuai">
+                            版块
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--header结束-->
+            <!--content开始-->
+            <div id="content" class="ub-f1 tx-l t-bla ub-img6">
+
+            </div>
+            <!--content结束-->
+        </div>
+    </body>
+    <script src="js/zepto.min.js"></script>
+    <script>
+        zy_init();
+        window.uexOnload = function(type) {
+            if (!type) {
+                var meURL = localStorage["meURL"];
+                if (meURL == 's_collect') {
+                    $("#form_name").html('收藏');
+                    $("#tiezi").addClass("nptopbar_btn_hover");
+                    $("#listtopbar").show();
+                } else if (meURL == 's_collect_fid') {
+                    $("#form_name").html('收藏');
+                    $("#bankuai").addClass("nptopbar_btn_hover");
+                    $("#listtopbar").show();
+                } else if (meURL == 's_isread') {
+                    $("#form_name").html("浏览历史");
+                    $("#tiezi").addClass("nptopbar_btn_hover");
+                    $("#listtopbar").show();
+                } else if (meURL == 's_isread_fid') {
+                    $("#form_name").html("浏览历史");
+                    $("#bankuai").addClass("nptopbar_btn_hover");
+                    $("#listtopbar").show();
+                } else if (meURL == 'jinghua') {
+                    $("#form_name").html(localStorage.username + '的精华帖');
+
+                } else {
+                    $("#form_name").html(localStorage.username + '的帖子');
+
+                }
+                /*else if(meURL=='s_collect_fid_edit'){
+                //070已经废弃
+                $("#form_name").html('编辑版块');
+                $(".list_back").css({"background":"none"});
+                $(".list_re").addClass("forms_tosave_btn").css({"background":""}).on('click',function(){
+                uexWindow.evaluatePopoverScript("root","index_content","location.reload()");
+                localStorage.meURL='s_collect_fid';
+                uexWindow.close('-1');
+                })
+                }*/
+                //判断来路加载LIST
+                $("#header").on('click', '.listtopbar .nptopbar_btn', function(e) {
+                    $(".listtopbar .nptopbar_btn").removeClass("nptopbar_btn_hover");
+                    if (meURL == 's_collect' || meURL == 's_collect_fid') {
+                        _getn = ($(this).attr('getname'));
+                        if (_getn == 'tiezi') {
+                            $(this).addClass("nptopbar_btn_hover");
+                            localStorage.meURL = 's_collect';
+                        } else {
+                            $(this).addClass("nptopbar_btn_hover");
+                            localStorage.meURL = 's_collect_fid';
+                        }
+                    } else {
+                        _getn = ($(this).attr('getname'));
+                        if (_getn == 'tiezi') {
+                            $(this).addClass("nptopbar_btn_hover");
+                            localStorage.meURL = 's_isread';
+                        } else {
+                            $(this).addClass("nptopbar_btn_hover");
+                            localStorage.meURL = 's_isread_fid';
+                        }
+                    }
+                    uexWindow.evaluatePopoverScript("me", "content", "location.reload()");
+                    //alert(meURL)
+                    //localStorage.meURL='s_collect';
+                    //zy_con("content", "me_content_main.html", 0, $$("header").offsetHeight);
+                })
+                //alert('应用是否为iOS7风格:' + );
+                if (uexWidgetOne.iOS7Style) {
+                    
+                    //alert("")
+                    document.getElementById("header").style.paddingTop = "1.125rem";
+                }
+                zy_con("content", "me_content_main.html", 0, $$("header").offsetHeight);
+
+            }
+            window.onorientationchange = window.onresize = function() {
+                zy_resize("content", 0, $$("header").offsetHeight);
+            }
+        }
+
+    </script>
+</html>

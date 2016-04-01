@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>
+    </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" href="css/ui-base.css">
+    <link rel="stylesheet" href="css/ui-box.css">
+    <link rel="stylesheet" href="css/ui-color.css">
+	<link rel="stylesheet" href="css/ui-365.css">    
+	<script src="js/zy_control.js">
+    </script>
+    <script src="js/zy_click.js">
+    </script>
+	<script src="js/zepto.min.js">
+    </script>
+	<script src="js/beihai365_comman.js">
+	</script>
+  </head>
+<body class="um-vp" ontouchstart>
+	<div id="page_0" class="up ub ub-ver" tabindex="0">
+		<div id="content" class="ub-f1 tx-l t-bla ub-img6 vh">
+			<div class="postArea">
+				<div class="postTitle">
+					<input type='text' id='atc_title' value='' placeholder="填写标题">
+				</div>
+				<div class="postText">
+					<textarea id='atc_content' placeholder="编辑内容"></textarea>
+				</div>
+				<input type='hidden' id='img' value=''>	
+				<!--按钮开始-->
+				<!--<div ontouchstart="zy_touch('btn-act')" onclick='xmlHttpPost()' class="btn uba b-bla uinn5 c-blu2 c-m1 uc-a1 t-wh">发布帖子</div>-->
+				<!--按钮结束-->
+				<!--<div ontouchstart="zy_touch('btn-act')" onclick="uexCamera.open();" >打开照相机</div>-->
+			</div>
+			<div class="upimgbtn" ontouchstart="zy_touch('btn-act')" onclick="uppick();"><span>上传照片</span></div>
+			<div class='thumbPlace'>
+			</div>
+			<div class='thumbPlace_zao'>
+			</div>
+		</div>
+	</div>
+</body>
+<script>
+	//前方有狼出没，未满18岁请在父母的陪同下阅读
+zy_init();
+var timer = null;
+var timer2 = null;
+window.uexOnload=function(type)
+{
+	if (!type){
+		uexCamera.cbOpen = getReadyToUpload;
+		uexUploaderMgr.cbCreateUploader = uexUploaderMgrCbCreateUploader;
+		uexUploaderMgr.onStatus = uexUploaderMgrStatusCb;
+		uexImageBrowser.cbPick = getReadyToUpload;
+		uexXmlHttpMgr.onData = httpSuccess;
+		//这一大堆都是记录用户内容的。
+		//隔一秒记录localStorage.eeeeeee
+		timer2 = setInterval(function(){
+			localStorage.tmp_read_post_title = $.trim($('#atc_title').val());
+			localStorage.tmp_read_post = $.trim($('#atc_content').val());
+			localStorage.tmp_read_post_img = $(".thumbPlace").html();
+			localStorage.tmp_read_post_img_btn = $(".upimgbtn").html();
+			localStorage.tmp_read_post_img_val = $("#img").val();
+			//如果都记录不到内容，证明没写，不用提示框
+			if (localStorage.tmp_read_post_title == '' && localStorage.tmp_read_post == '' && localStorage.tmp_read_post_img_val == '') {
+				uexWindow.evaluateScript("post", "0", "takekey('none')");
+			}
+			else {
+				uexWindow.evaluateScript("post", "0", "takekey('ok')");
+			}
+		}, 100);
+		timer = setInterval(showhidebtn, 100);
+		function showhidebtn(){
+			if ($.trim($('#atc_content').val()).length > 5 && $.trim($('#atc_title').val()) != '') {
+				uexWindow.evaluateScript("post", "0", "PostBtnShow()");
+			}
+			else {
+				uexWindow.evaluateScript("post", "0", "PostBtnShow('ok')");
+			}
+		}
+		if (localStorage.tmp_read_switch == "yes") {
+			$("#atc_content").html(localStorage.tmp_read_post);
+			$('#atc_title').val(localStorage.tmp_read_post_title);
+			$(".thumbPlace").html(localStorage.tmp_read_post_img);
+			$(".upimgbtn").html(localStorage.tmp_read_post_img_btn);
+			$("#img").val(localStorage.tmp_read_post_img_val)
+		}
+		
+		/*
+		$('#atc_content').focus(function(){
+			$('.thumbPlace_zao').hide();
+		});
+		$('#atc_content').blur(function(){
+			$('.thumbPlace_zao').show();
+		});*/
+		
+
+	}
+}
+var httpCode = 0;
+var picUploadHttp = beihai365_url + "/index.php?c=threads&m=uploadimg&uid="+localStorage.uid +"&save_code=" + localStorage.save_code;
+var url = beihai365_url + "/index.php?c=threads&m=post&fid="+localStorage.fid+"&uid=" + localStorage.uid +"&save_code="+ localStorage.save_code;
+
+function xmlHttpPost(){
+	//alert(url)
+	//关闭定时
+	clearInterval(timer);
+	uexWindow.evaluateScript("post","0","PostBtnShow('ok')");
+	uexWindow.toast(0,5,'请稍等...',0);
+	uexXmlHttpMgr.open("2","POST",url,"600000");
+	var atc_title = $$('atc_title').value;
+	var atc_content = $$('atc_content').value;
+	var img = $$('img').value;
+	//alert(img);
+	uexXmlHttpMgr.setPostData("2","0","atc_title",atc_title);
+	uexXmlHttpMgr.setPostData("2","0","atc_content",atc_content + "\n" +img);
+	uexXmlHttpMgr.send("2");
+	uexWindow.closeToast();
+}
+function httpSuccess(opid,status,result)  {
+	if(status == -1){
+		uexWindow.toast(0,5,'出错了',0);
+	}
+	if(status == 1){
+		//1表示接收成功
+		uexWindow.closeToast();
+		uexXmlHttpMgr.close(opid);
+		var json = JSON.parse(result);
+		if(json.result == '发帖成功'){
+			//发布成功后清空保存标记
+			localStorage.tmp_read_switch = "no";
+			uexWindow.evaluateScript("post","0","fanhui('go')");
+			uexWindow.evaluateScript("listwin","0","postretun()");
+			
+		}else{
+			timer = setInterval(showhidebtn, 100);
+			uexWindow.alert("提示信息",json.result,"我知道了")	
+		}
+	}
+	if(status == 0 ){
+		uexWindow.toast(1,5,'正在接收',0);
+	}
+}
+/*
+发图
+*/
+function getReadyToUpload(opCode, dataType, data){
+	upload_image_url = data;
+	var thumbHTML = '<div class="thumbPicBox">'+
+		'<div class="ub">'+
+			'<div id="thumbPic_box" ontouchstart="uexImageBrowser.open(\''+data+'\',0,0);"><img class="thumbPic" src="'+data+'" /></div>'+
+			'<div class="thumbub" id="thumbub">'+
+			'</div>'+
+		'</div>'+
+	'</div>';
+	$('.thumbPlace').html(thumbHTML);
+	httpCode = httpCode + 1;
+	uexUploaderMgr.createUploader(httpCode,picUploadHttp);
+}
+
+function uexUploaderMgrCbCreateUploader(opCode,dataType,data){
+	if(data == 0){	
+		uexUploaderMgr.uploadFile(opCode,upload_image_url,"photo","0");	
+	}else{
+		alert('上传失败');
+		cancelPic();
+	}
+}
+function uexUploaderMgrStatusCb(opCode,fileSize,percent,serverReback,status){
+	switch (status) {
+           case 0://正在上传
+                   /*
+                 if(fileSize>2097152){
+                     uexUploaderMgr.closeUploader(opCode);
+                     uexWindow.toast(1,5,'图片超过2M',2000);
+					 return false;
+                  }else{
+				  		uexWindow.toast(1,5,'正在上传：'+percent + '%..',0);
+                  }
+                  */
+                  uexWindow.toast(1,5,'正在上传：'+percent + '%..',0);
+                  break;
+           case 1://上传完毕
+           		 uexWindow.closeToast();
+				 var rjson = JSON.parse(serverReback);
+				  if(rjson.result == 'success'){
+					$$('img').value = '[img]' + rjson.url + '[/img]';
+					var infotext ='<div class="thumbPicInfo"><span><div styel="word-wrap:break-word;">'+rjson.name+'</div>大小：+'+(rjson.size/1024/1024).toFixed(2)+'M</span></div><div class="thumbPicDel" ontouchstart="cancelPic()"><span>删除</span></div>';
+					$("#thumbub").css({height:$(".thumbPicBox").height()}).html(infotext);
+					$(".thumbPlace_zao").css({height:$(".thumbPicBox").height(),"opacity":"0"}).hide();
+				  }else{
+				  	alert(rjson.result);
+				  }
+				  uexUploaderMgr.closeUploader(opCode);
+				  $('.upimgbtn').html('<span>替换照片</span>');
+                  break;
+           case 2:
+		   		uexWindow.closeToast();
+           		 var rjson = JSON.parse(serverReback);
+				 //alert(rjson.result);
+                 alert("图片上传失败，可能是图片太大了，请缩小图片再试试看。");
+				 cancelPic();
+                 uexUploaderMgr.closeUploader(opCode);
+                 break;
+        }    
+}
+
+function cancelPic(){
+	$(".thumbPlace_zao").css({"background":"#fff","opacity":"1"}).show();
+	$(".thumbPicBox").hide();
+	$$('img').value = '';
+	$('.upimgbtn').html('<span>上传照片</span>');
+}
+function uppick(){
+	uexWindow.cbActionSheet = uPpickcbSuccess;
+	var as=['拍照','从手机相册选择'];
+	uexWindow.actionSheet('','取消',as);
+	//uexImageBrowser.pick();
+}
+function uPpickcbSuccess(opId,dataType,data){
+		if(data==0){
+			uexCamera.open();
+			
+		}else if(data == 1){
+			uexImageBrowser.pick();
+		}
+}
+</script>
+</html>

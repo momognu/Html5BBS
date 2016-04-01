@@ -1,0 +1,104 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1.0, user-scalable=no" />
+        <link rel="stylesheet" href="css/ui-tab.css">
+        <link rel="stylesheet" href="css/ui-base.css">
+        <link rel="stylesheet" href="css/ui-box.css">
+        <link rel="stylesheet" href="css/ui-color.css">
+        <link rel="stylesheet" href="css/ui-res.css">
+        <link rel="stylesheet" href="css/ui-365.css">
+        <script src="js/zepto.min.js"></script>
+        <script src="js/md5.js"></script>
+        <script type="text/javascript">
+            var tgurlroot = "http://api.app.taobeihai.com"
+            window.uexOnload = function() {
+                
+                //alert('应用是否为iOS7风格:' + );
+                if (uexWidgetOne.iOS7Style) {
+                    //alert("")
+                    
+                    document.getElementById("header").style.paddingTop  = "1.125rem";
+                }
+                //
+                if (!localStorage.isTuiguang) {
+                    $("#tgm-box").show();
+                }
+                //imei
+                uexDevice.getInfo('10');
+                //厂商信息
+                uexDevice.getInfo('2');
+
+                uexDevice.cbGetInfo = function(opCode, dataType, data) {
+                    var device = eval('(' + data + ')');
+
+                    var manufacturer = device.manufacturer;
+                    if (manufacturer != null && manufacturer.length > 0) {
+                        document.getElementById('manufacturer').value = manufacturer;
+                    }
+
+                    var imei = device.imei;
+                    if (imei != null && imei.length > 0) {
+                        document.getElementById('imei').value = imei;
+                    }
+
+                }
+            }
+            function getTGM() {
+                if ($("#tgm").val() == "") {
+                    alert("先写推广码哦~~~")
+                } else {
+                    var tgm = $("#tgm").val();
+                    var _imei = $("#imei").val();
+                    var _phone_type = $("#manufacturer").val();
+                    var imeimd5 = hex_md5(_imei);
+                    var hash = hex_md5(tgm + imeimd5);
+                    var url = tgurlroot + "/appextend/spread?jsoncallback=?&imei=" + _imei + "&spread_person_sn=" + tgm + "&screatesn=" + hash + "&app_type=1&om_lng=&om_lat=&phone_type=" + _phone_type + "&phone_number=";
+                    $.getJSON(url, function(data) {
+                        if (data.result == "success") {
+                            localStorage.isTuiguang = "1";
+                            $("#tgm-box").hide();
+                            alert("登记成功，感谢！");
+                        } else {
+                            alert(data.result)
+                        }
+                    })
+                }
+            }
+
+        </script>
+    </head>
+    <body class="um-vp c-wh">
+        <div id="page_0" class="up ub ub-ver" tabindex="0">
+            <div id="header" class="uh c-m15 t-wh ub head_top_home">
+                <div class="list_back" ontouchstart="zy_touch('click_opacity')" onclick="uexWindow.close('-1');"></div>
+                <h1 id="form_name" class="ub-f1 ulev5 ut-s tx-c" tabindex="0">关于</h1>
+                <div class="list_re" style="background:none;"></div>
+            </div>
+            <!--header结束-->
+            <!--content开始-->
+            <div id="content" class="ub-f1 tx-l t-bla ub-img6" style="">
+                <!--文本开始-->
+                <div style="text-align: center"><img src="css/img/new_icon/about_1.png" style="margin-top: 1rem ; width: 6rem;">
+                    <span style="display: block">版本 V1.3.2</span>
+                    <img src="css/img/new_icon/about_2.png" style="margin-top: 1rem ; width: 14rem;">
+                </div>
+                <div class="tgm-box" id="tgm-box" style="margin: 0 1rem 1rem; display: none;">
+                    <div class="inputLine il-gdcode">
+                        <div class="getGdcodeBtn" id="getGdcodeBtn" onclick="getTGM();">
+                            提交
+                        </div>
+                        <div class="ir">
+                            <input id="tgm" name="tgm" value="" placeholder="请输入推广编号" type="text">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <input id="manufacturer" type="hidden" name="" id="" value="" />
+            <input id="imei" type="hidden" name="" id="" value="" />
+
+    </body>
+</html>

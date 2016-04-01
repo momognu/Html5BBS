@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" href="css/ui-tab.css">
+        <link rel="stylesheet" href="css/ui-base.css">
+        <link rel="stylesheet" href="css/ui-box.css">
+        <link rel="stylesheet" href="css/ui-color.css">
+        <link rel="stylesheet" href="css/ui-res.css">
+        <link rel="stylesheet" href="css/ui-365.css">
+        <link rel="stylesheet" href="css/ui-single.css">
+        <script src="js/beihai365_comman.js"></script>
+        <script src="js/beihai365_global.js"></script>
+
+        <script src="js/zepto.min.js"></script>
+
+    </head>
+    <body class="fp-section um-vp" style="background: #fff;">
+        <div class="">
+            <div class="single-loading">
+                <img src="css/img/loadding.png" class="single-loadimg" />
+                <p class="c_grey_66 f14">
+                    正在加载中
+                </p>
+            </div>
+
+            <div class="detail_pouper js-detail-po" style="display:none;">
+                <h1 class="">选择要加入的帖单 </h1>
+                <p class="js-create-list creat_btn" style="color: #fea714;">
+                    创建新帖单
+                </p>
+                <ul class="detail_ul" id="js-creat-ul">
+
+                </ul>
+                <div class="clearfix pouper_bottom">
+                    <div class="ifgolist fr js-change-w">
+                        <p class="js-change golistwar">
+                            <span class="golisticon js-change-icon"></span>
+                        </p>
+                    </div>
+                    <p class="f14 fr js-text">
+                        预览帖单
+                    </p>
+
+                </div>
+            </div>
+            <div class="newSingle js-new-sing" style="display:none;">
+                <p class="single_btn js-create-list">
+                    <span class="follow_icon"></span>创建新帖单
+                </p>
+                <h1 class="c_grey_33 f24">什么是帖单？</h1>
+                <p>
+                    帖单是按主题收集帖子的工具。看到喜欢的帖子可以收藏到自己的帖单中，方便以后找到。你还可以关注感兴趣的帖单，去发现其他人收集的好东西。
+                </p>
+            </div>
+
+            <!--footer结束-->
+        </div>
+    </body>
+
+    <script>
+        //记录来路
+        // var uid = localStorage.uid;
+
+        //测试时需要
+        //uid = '461783';
+
+        console.log(localStorage.uid);
+
+        ;(function() {
+            var showdec = 'true';
+            var windowHeight = localStorage.windowHeight;
+
+            window.uexOnload = function() {
+                intfun();
+            }
+            
+            function intfun() {
+                var url = reLink('/index.php?c=threadslist&do=simple_collections_list&tid=' + localStorage.tid);
+                //console.log(url)
+                //摘取数据
+                AJAX.get(url, function(data) {
+                    var data = JSON.parse(data);
+                    //console.log(data);
+
+                    
+                    if (data.result == 'success') {
+                        if (data.data.length <= 0) {
+                            if (!localStorage.nofristCtreate) {
+                                $('.js-detail-po,.single-loading').hide();
+                                $('.js-new-sing').show();
+                                localStorage.nofristCtreate = true;
+
+                            } else {
+                                $('.js-new-sing,.single-loading').hide();
+                                $('.js-detail-po').show();
+                            }
+
+                        } else {
+                            var html = '';
+                            var lists = data.data.collection_list;
+
+                            for (var i = 0; i < lists.length; i++) {
+                                var list = lists[i];
+                                if (list.collection_name.length <= 0) {
+                                    continue;
+                                }
+                                var follow_num = '',
+                                    postsnum = '';
+                                if (list.follow_num > 0) {
+                                    follow_num = '，' + list.follow_num + '人关注';
+                                }
+                                if (list.postsnum > 0) {
+                                    postsnum = list.postsnum + '个帖子';
+                                }
+                                html += '<li class="ub ub-ac" data-cid=' + list.collection_id + '>' + '<div class="liicon"></div>' + '<div class="ub-f1 listr">' + '<p class="detail_lispan">' + list.collection_name + '</p>' + '<p class="f14">' + postsnum + follow_num + '</p>' + '</div>' + '</li>';
+                            }
+
+                            $('#js-creat-ul').html(html).on('click', 'li', function() {
+                                var cid = $(this).attr('data-cid');
+                                localStorage.singleCid = cid;
+                                localStorage.ifCreatorInv = 'true';
+                                addList(cid)
+                            });
+
+                            $('.single-loading,.js-new-sing').hide();
+                            $('.js-detail-po').show(); 
+                        }
+                        
+                        moveoff()
+                    } else {
+                        uexWindow.toast("0", "5", data.msg, "0");
+                    }
+                })
+                
+                function addList(cid) {
+                    var joinlist = reLink('/index.php?c=threadslist&do=join_collection&category=0&cid=' + cid + '&tid=' + localStorage.tid);
+
+                    AJAX.get(joinlist, function(data) {
+                        var data = JSON.parse(data);
+                        if (data.result == 'success') {
+                            if (showdec == 'true') {
+                                //for 记住打开single-dec这种要用统一的函数，不然会duang!这里不用是因为要换动画
+                                var tiedanDecWindowId = 'single-dec' + localStorage.tiedanDecWindowId;
+                                uexWindow.open(tiedanDecWindowId,'0','stick_single_dec.html','12','','','4');
+                                //newOpenWin('single-dec', 'stick_single_dec.html');
+                            } else {
+                                uexWindow.toast("0", "5", '添加成功', "1000");
+                            }
+                            var reName = ("detail" + localStorage.detailWindowId);
+                            uexWindow.evaluatePopoverScript(reName, "detail_content", "colseTiedan();oRead.loadData(0, true , 1)");
+                            //uexWindow.evaluatePopoverScript(reName, "detail_content", "oRead.loadData()");
+                            
+                        } else {
+                            uexWindow.toast("0", "5", data.msg, "1000");
+                        }
+                    }, function() {
+                        alert('拉不到数据')
+                    })
+                }
+
+
+                $('.js-create-list').click(function() {
+                    //创建帖单
+                    localStorage.ifedit = 'create';
+                    localStorage.username = localStorage.username;
+                    localStorage.tid = localStorage.tid;
+                    //帖子的tid
+                     var reName = ("detail" + localStorage.detailWindowId);
+                     uexWindow.evaluatePopoverScript(reName, "detail_content", "colseTiedan()");
+                    
+                    //uexWindow.open('single-title', '0', 'stick_single_title.html', '12', '', '', '4');
+                    newOpenWin('single-title', 'stick_single_title.html');
+                })
+                
+                function moveoff(){
+
+                    var popX = 0,
+                        popY = 0,
+                        moveX = 0,
+                        moveY = 0;
+                    var changeicon = $('.js-change-icon');
+                    var w = $('.js-change').width() - changeicon.width();
+
+                    if (!localStorage.ifchange) {
+                        changeicon.css('left', w);
+                        showdec = 'true';
+                        $('.js-change-w').removeClass('goli_orange');
+                    } else {
+                        showdec = 'false';
+                        changeicon.css('left', 0);
+                        $('.js-change-w').addClass('goli_orange');
+                    }
+
+                    //
+                    // //滚动事件
+                    // $('.js-change-w').bind("touchstart",function(event){
+                    // var touchPros = event.touches[0];
+                    // popX = touchPros.pageX;
+                    // });
+                    //
+                    // $('.js-change-w').bind("touchmove",function(event){
+                    // var touchPros = event.touches[0];
+                    // moveX = touchPros.pageX;
+                    // moverf($(this))
+                    // });
+                    //
+                    // $('.js-change-w').bind("touchend",function(event){
+                    // moverf($(this))
+                    // });
+
+
+                    $('.js-change-w').click(function() {
+                        console.log(showdec)
+                        if (showdec == 'false') {
+                            showdec = 'true';
+                            $(this).removeClass('goli_orange');
+                            changeicon.css('left', w);
+                            localStorage.ifchange = '';
+                        } else {
+                            showdec = 'false';
+                            $(this).addClass('goli_orange');
+                            changeicon.css('left', 0);
+                            localStorage.ifchange = 'noshow';
+                        }
+                    })
+                    
+                    function moverf(that) {
+                        changeicon.css('left', moveX - popX);
+
+                        if (moveX - popX >= (w / 2)) {
+                            showdec = 'true';
+                            that.removeClass('goli_orange');
+                            changeicon.css('left', w)
+                        } else if (moveX - popX <= 0) {
+                            showdec = 'flase';
+                            that.addClass('goli_orange');
+                            changeicon.css('left', 0)
+                        }
+                    }
+                    
+                    
+
+                }
+
+            }
+
+        })()
+    </script>
+
+</html>

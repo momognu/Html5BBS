@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" href="css/ui-base.css">
+        <link rel="stylesheet" href="css/ui-box.css">
+        <link rel="stylesheet" href="css/ui-color.css">
+        <link rel="stylesheet" href="css/ui-res.css">
+        <link rel="stylesheet" href="css/ui-365.css">
+        <script src="js/zy_control.js"></script>
+        <script src="js/zy_tmpl.js"></script>
+        <script src="js/beihai365_comman.js"></script>
+        <script src="js/zy_click.js"></script>
+        <script src="js/beihai365_global.js"></script>
+    </head>
+    <body class="um-vp c-wh m2-homeNewbg" ontouchstart>
+        <!--content开始-->
+
+        <div id="content" class="ub-f1 tx-l t-bla ub-img6">
+            <div id="login_ok" style="display:none;">
+                <div class="user_box" id="user_box">
+                    
+                </div>
+
+                <!--<div class="list_more_border">
+                    <div class="list_more_li ub list_more_li_bt list_more_li_one" ontouchstart="zy_touch('click_opacity')" onclick="openMyPage('s_collect_fid')">
+                        <div class="list_more_icon list_more_icon_1"></div>
+                        <div class="ub-f1" >
+                            <div class="titie f18">
+                                收藏的版块
+                            </div>
+                            <div class="sub f12"></div>
+                        </div>
+                    </div>
+                    <div class="list_more_li ub list_more_li_one" ontouchstart="zy_touch('click_opacity')" onclick="openMyPage('s_collect')">
+                        <div class="list_more_icon list_more_icon_2"></div>
+                        <div class="ub-f1" >
+                            <div class="titie f18">
+                                收藏的帖子
+                            </div>
+                            <div class="sub f12"></div>
+                        </div>
+                    </div>
+                </div>-->
+                
+                
+                <div class="list_more_border">
+                    <div class="list_more_li ub list_more_li_bt list_more_li_one" ontouchstart="zy_touch('click_opacity')" onclick="openMyPageSingle('create')">
+                        <div class="list_more_icon list_more_icon_1"></div>
+                        <div class="ub-f1" >
+                            <div class="titie f18">
+                                我创建的帖单<span class="sub f12 js-create-num"></span>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    <div class="list_more_li ub list_more_li_one" ontouchstart="zy_touch('click_opacity')" onclick="openMyPageSingle('focus')">
+                        <div class="list_more_icon list_more_icon_2"></div>
+                        <div class="ub-f1" >
+                            <div class="titie f18">
+                                我关注的帖单<span class="sub f12 js-follow-num"></span>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>             
+                
+                
+                <div class="list_more_border">
+                    
+                    <div class="list_more_li ub list_more_li_bt list_more_li_one" id="js-thread" style="display:none !important;" ontouchstart="zy_touch('click_opacity')" onclick="openMyModule()">
+                        <div class="list_more_icon list_more_icon_5"></div>
+                        <div class="ub-f1" >
+                            <div class="titie f18">
+                                我的版块<span class="sub f12 js-thread-num"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+                    <div class="list_more_li ub list_more_li_bt list_more_li_one" ontouchstart="zy_touch('click_opacity')" onclick="openMyPage('s_isread_fid')">
+                        <div class="list_more_icon list_more_icon_3"></div>
+                        <div class="ub-f1" >
+                            <div class="titie f18">
+                                浏览过的版块
+                            </div>
+                            <div class="sub f12"></div>
+                        </div>
+                    </div>
+
+                    <div class="list_more_li ub list_more_li_one" ontouchstart="zy_touch('click_opacity')" onclick="openMyPage('s_isread')">
+                        <div class="list_more_icon list_more_icon_4"></div>
+                        <div class="ub-f1" >
+                            <div class="titie f18">
+                                浏览过的帖子
+                            </div>
+                            <div class="sub f12"></div>
+                        </div>
+                        <!--<div class="list_more_jiantou"></div>-->
+                    </div>
+
+                    <!--<div class="list_more_li ub list_more_li_bt list_more_li_one" ontouchstart="zy_touch('click_opacity')" onclick="openMyPage('s_collect_fid_edit')">
+                    <div class="ub-f1" >
+                    <div class="titie f18">编辑</div>
+                    <div class="sub f12"></div>
+                    </div>
+                    <div class="list_more_jiantou"></div>
+                    </div>-->
+
+                </div>
+            </div>
+            <div id="login_no" style="display:none;">
+                <div style="text-align:center; padding:5em 3em 1em;">
+                    亲，只要您登录了
+                    <br>
+                    就能看到“我的365”了！
+                </div>
+                <div class="regBtn" style="margin:0 3em;" ontouchstart="zy_touch('click_opacity')" onclick="loginBtn()">
+                    <span>我要登录</span>
+                </div>
+                <div class="regBtn regBtnColor2" style="margin:1rem 3em;" ontouchstart="zy_touch('click_opacity')" onclick="newOpenWin('reg', 'reg.html' , 1024);">
+                    <span>我要注册</span>
+                </div>
+
+            </div>
+        </div>
+        <!--content结束-->
+    </body>
+    <script src="js/zepto.min.js"></script>
+    <script>
+        zy_init();
+        window.uexOnload = function(type) {
+            uexWindow.setBounce("0");
+            //记录来路
+            localStorage.returnType = 'me_index';
+            //用户id
+            //var t = null;
+            myOnload();
+
+        }
+        function myOnload() {
+            var uid = localStorage['uid'];
+            console.log(uid);
+            if (uid) {
+                $("#login_no").hide();
+                $("#login_ok").show();
+                uProfile.get_Profile();
+                
+            } else {
+                $("#login_no").show();
+                $("#login_ok").hide();
+            }
+        }
+
+        var uProfile = {
+            Profile_url : beihai365_url + "/index.php?jsoncallback=?&version=" + version + "&c=threads&m=profile&uid=" + localStorage['uid'],
+            get_Profile : function() {
+                $.getJSON(uProfile.Profile_url, function(data) {
+                    console.log(data)
+                    var ProfileHtml = '<div class="user_box_touxiang">' + '<tx class="meimgBox"><img src="http://www.beihai365.com/plugins/appserver/users.php?do=getfaceimg&amp;uid=' + data.profile.uid + '" onerror="this.src=\'http://www.beihai365.com/images/face/none.gif\'" class="touxiang"></tx>' + '<span>' + data.profile.username + '</span>' + '<span class="badge_me">' + data.profile.membergroup + '</span></div>'  + '<div class="user_box_ziliao user_box_ziliao_b" ontouchstart="zy_touch(\'click_opacity\')" onclick="openMyPage(\'me\')">' + '<span>' + data.profile.mythreads + '</span><span class="jibiename"><span>我的帖子</span></span>' + '</div>' + '<div class="user_box_ziliao user_box_ziliao_c" ontouchstart="zy_touch(\'click_opacity\')" onclick="openMyPage(\'jinghua\')">' + '<span>' + data.profile.digests + '</span><span class="jibiename"><span>我的精华</span></span>' + '</div><div class="user_box_bottom_bg"></div>';
+                    $("#user_box").html(ProfileHtml);
+                     if( data.profile.userthreadcount ){
+                         $('#js-thread').show();
+                         $('.js-thread-num').html(data.profile.userthreadcount);
+                     }
+                });
+                
+                //拉取帖单数量
+                var listnum = reLink( '/index.php?c=threadslist&do=count_follow_and_create');
+                AJAX.get(listnum, function(data){
+                   var data = JSON.parse(data);
+                   if(data.result == 'success'){
+                      var count_create  = data.data.count_create > 0 ? data.data.count_create : '';
+                      var count_follow  = data.data.count_follow > 0 ? data.data.count_follow : '';
+                      $('.js-create-num').html(count_create);
+                      $('.js-follow-num').html(count_follow);
+                      
+                   }else{
+                       uexWindow.toast("0","5", data.msg ,"0");
+                   }  
+                }) 
+            }
+        }
+
+        function openMyPage(m) {
+            newOpenWin('me', 'me_content_head.html' , 1024);
+            localStorage.meURL = m;
+        }
+        
+        function openMyPageSingle(m) {
+           localStorage.ifcreate = m;
+           var tiedanWindowId = 'single-list' + localStorage.tiedanWindowId;
+           newOpenWin(tiedanWindowId, 'stick_single_list.html' , 1024);
+            
+        }      
+        
+        function loginBtn(){
+            localStorage.loginType = "root";
+            newOpenWin('login', 'login.html' , 1024);
+        }
+        
+         function openMyModule() {
+            newOpenWin('my_threads', 'my_threads.html' , 1024); 
+        }       
+        
+    </script>
+</html>

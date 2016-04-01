@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" href="css/ui-tab.css">
+        <link rel="stylesheet" href="css/ui-base.css">
+        <link rel="stylesheet" href="css/ui-box.css">
+        <link rel="stylesheet" href="css/ui-365.css">
+        <link rel="stylesheet" href="css/ui-single.css">
+        <script src="js/beihai365_comman.js"></script>
+        <script src="js/beihai365_global.js"></script>
+
+        <script src="js/zepto.min.js"></script>
+        <script src="js/laytpl.js"></script>
+        <script src="js/iscroll.js"></script>
+        <script src="js/share_read.js"></script>
+        <style>
+        </style>
+
+    </head>
+
+    <body class="fp-section">
+        <div class="poule_bg" id="sinlge_share" onclick="uexWindow.closePopover('sinlge_share')" style="z-index:1"></div>
+        <div class="c_grey_66 bg_white share_box">
+            <ul class="share_single_ul ub js-share">
+                <li class="ub-f1" data-datanum="1">
+                    <img src="css/img/seach/share_1.png" />
+                    <p class="">
+                        微信好友
+                    </p>
+                </li>
+                <li class="ub-f1" data-datanum="2">
+                    <img src="css/img/seach/share_2.png" />
+                    <p class="">
+                        朋友圈
+                    </p>
+                </li>
+                <li class="ub-f1" data-datanum="3">
+                    <img src="css/img/seach/share_3.png" />
+                    <p class="">
+                        QQ
+                    </p>
+                </li>
+                <li class="ub-f1" data-datanum="4">
+                    <img src="css/img/seach/share_4.png" />
+                    <p class="">
+                        短信
+                    </p>
+                </li>
+            </ul>
+            <ul class="share_single_ul ub js-share">
+                <li class="ub-f1" data-datanum="5">
+                    <img src="css/img/seach/share_5.png" />
+                    <p class="">
+                        复制链接
+                    </p>
+                </li>
+                <li class="ub-f1" data-datanum="6">
+                    <img src="css/img/seach/share_6.png" />
+                    <p class="">
+                        刷新
+                    </p>
+                </li>
+                <li class="ub-f1">
+                    <img src="css/img/seach/share_0.png" />
+                </li>
+                <li class="ub-f1">
+                    <img src="css/img/seach/share_0.png" />
+                </li>
+            </ul>
+        </div>
+
+    </body>
+
+    <script>
+        var $shareUrl = localStorage.shareUrl;
+        var $shareTitle = localStorage.shareTitle;
+        var $shareContent = localStorage.shareContent;
+        var $shareType = localStorage.shareType;
+        //var $shareWXdata = localStorage.shareWXdata;
+        window.uexOnload = function(type) {
+            if (!type) {
+                $('.js-share').on('click', 'li', function() {
+                    var datanum = $(this).attr('data-datanum');
+                    setShare(datanum);
+                    uexWindow.closePopover('sinlge_share');
+                })
+            }
+        }
+        
+        function setShare(data) {
+            //alert(data)
+            switch(data){
+                case "1":
+                    //微信好友
+                    wx_share(0);
+                break;
+                case "2":
+                    //朋友圈
+                    wx_share(1);
+                break;
+                case "3":
+                    //QQ
+                    qq_share();
+                break;
+                case "4":
+                    //短信
+                    sms_share();
+                break;
+                case "5":
+                    //复制
+                    copy_share();
+                break;
+                case "6":
+                    //刷新
+                    reload_share();
+                break;
+                default:
+
+            }
+        }
+        
+        // 短信发送
+        function sms_share() {
+            var SMS = $shareTitle + '\n'  + $shareUrl;
+            uexSMS.open("", SMS);
+        }
+
+        // 邮件发送
+        function mail_share() {
+            uexEmail.open("", $shareTitle, $shareContent, '');
+        }
+        //微信
+        function wx_share(n) {
+            var JsonData = '{"thumbImg":"res://shareicon.png","wedpageUrl":"' + $shareUrl + '","scene":' + n + ',"title":"' + $shareTitle + '","description":"' + $shareContent + '"}';
+            uexWeiXin.shareLinkContent(JsonData);
+        }
+        
+        //复制
+        function copy_share(n) {
+            uexClipboard.copy($shareUrl);
+            uexWindow.alert("复制成功！", "你可以把帖子地址粘贴到微信、微博、QQ、短信发给朋友", "我知道了")
+        }
+        
+        //刷新
+        function reload_share(n) {
+           uexWindow.evaluateScript($shareType,"0","location.reload()");
+        }
+
+    </script>
+
+</html>

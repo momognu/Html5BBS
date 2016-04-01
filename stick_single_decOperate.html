@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" href="css/ui-tab.css">
+        <link rel="stylesheet" href="css/ui-base.css">
+        <link rel="stylesheet" href="css/ui-box.css">
+        <link rel="stylesheet" href="css/ui-color.css">
+        <link rel="stylesheet" href="css/ui-res.css">
+        <link rel="stylesheet" href="css/ui-365.css">
+        <link rel="stylesheet" href="css/ui-single.css">
+        <script src="js/zepto.min.js"></script>
+        <script src="js/zy_control.js"></script>
+        <script src="js/zy_click.js"></script>
+        <script src="js/beihai365_comman.js"></script>
+        <script src="js/beihai365_global.js"></script>
+
+    </head>
+
+    <body class="um-vp c-wh" ontouchstart>
+        <div id="page_0" class="up ub ub-ver" tabindex="0">
+            <!--header开始-->
+            <div id="header">
+                <div class="read-header">
+                    <div class="ub ub-ac" onclick="stopPP(event);">
+                        <div class="read-header-left ub ub-ac ub-f1 js-back" onclick="uexWindow.close('-1');">
+                            <span class="read-header-back" style="background: none; width: .625rem;" title="这样放个箭头太丑了"></span>
+                            <span class="read-header-title js-head-title">关闭操作</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--header结束-->
+
+            <!--content开始-->
+
+            <div id="stick_single_decOperate_content" class="ub-f1 tx-l t-bla ub-img6"></div>
+
+            <!--content结束--><!--footer开始-->
+
+            <!--footer结束-->
+
+        </div>
+    </body>
+    <script>
+        window.uexOnload = function(type) {
+            if (!type) {
+                if (uexWidgetOne.iOS7Style) {
+                    $("#header .read-header").css({
+                        "padding-top" : "1.25rem"
+                    });
+                }
+                zy_con("stick_single_decOperate_content", "stick_single_decOperate_content.html", 0, $$("header").offsetHeight);
+            }
+
+            window.onorientationchange = window.onresize = function() {
+            }
+        }
+        function editQiao(text) {
+            uexWindow.evaluatePopoverScript("", "stick_single_decOperate_content", "editTitle('" + text + "');refreshDec()");
+        }
+
+    </script>
+</html>

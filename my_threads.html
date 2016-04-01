@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" href="css/ui-input.css">
+        <link rel="stylesheet" href="css/ui-base.css">
+        <link rel="stylesheet" href="css/ui-box.css">
+        <link rel="stylesheet" href="css/ui-color.css">
+        <link rel="stylesheet" href="css/ui-365.css">
+        <script src="js/zy_control.js"></script>
+        <script src="js/zy_click.js"></script>
+        <script src="js/beihai365_comman.js"></script>
+        <script src="js/beihai365_global.js"></script>
+        <script src="js/zepto.min.js"></script>
+        <script src="js/jquery.mobile.custom.min.js"></script>
+        <script src="js/laytpl.js"></script>
+        <script type="text/javascript" src="js/iscroll-probe.js"></script>
+        
+    </head>
+
+    <body class="um-vp c-wh m2-homeNewbg" ontouchstart>
+
+        <div id="page_0" class="up ub ub-ver" tabindex="0">
+            
+           <div id="header" >
+                <div class="uh c-m15 t-wh ub head_top_home">
+                    <div class="list_back"  onclick="uexWindow.close('-1');"></div>
+                    <h1 id="form_name" class="ub-f1 ulev5 ut-s tx-c" tabindex="0">我的版块</h1>
+                    <div class="list_re" style="background:none;"></div>
+                </div>
+            </div>
+            
+           <div class="js-is-hide p3"  style="display:none;">
+                 <section class="ulev-4 " id="bbs-list">
+                    
+                </section>
+            </div>
+        </div>
+    </body>
+    <script type="text/javascript" src="js/handlebars.js"></script>
+    
+    <script id="bbs-template" type="text/x-handlebars-template">
+       {{#each this}}
+        {{#ifmy fname}}
+            {{#compare data}}
+                <div class="ovh">
+                    <ul class="bbs_ul clearfix">
+                        {{#each data}}
+                         <li class="ub">
+                            <div class="ub-f1">
+                                <p class="ut-s" onclick="loadThing.openSelect('{{fid}}')">{{name}}</p>
+                                {{#ifture isgroupflag}}
+                                <p class="group_sign">小组</p>
+                                {{/ifture}}
+                                </div>
+                            <p class="bbs_i js-bbs-dispost" data-fid="{{fid}}"><span>减</span></p>
+                         </li>
+                        {{/each}}
+                    </ul>
+                </div>
+                {{else}}
+                <div class="tx-c f18">您还没加入版块哦~</div>
+            {{/compare}}     
+           {{/ifmy}} 
+        {{/each}}    
+    </script>
+    
+    <script>
+        zy_init();
+        window.uexOnload = function(type) {
+            
+            if (uexWidgetOne.iOS7Style) {
+                $("#header").prepend('<div class="iPhoneBar"></div>');
+            } 
+            
+            uexWindow.setBounce("0");
+            localStorage.returnType = "bbs_list";
+            lodding.show();
+            loadThing.loadhtml()
+        }
+            
+        var loadThing = {
+            uid: getLocalStorge('uid'),
+            loadhtml : function(){
+                var _that = this;
+                var url = 'http://beihai365.com/phone/index.php?c=threads&m=channeladdthread&cid=34&uid='+_that.uid;
+                AJAX.get( url, function(data) {
+                    var data = JSON.parse(data);
+                    if( data.result == 'success'){
+                        console.log(data);
+                        _that.creatHtml(data.forums);
+                    }
+                })
+            },
+            creatHtml : function(data) {
+                var _that = this;
+                 Handlebars.registerHelper("compare",function(v1,options){
+                       if(v1 && v1.length > 0){
+                         return options.fn(this);
+                       }else{
+                         return options.inverse(this);
+                       }
+                 });
+                 Handlebars.registerHelper("ifture",function(v1,options){
+                       if(v1 == '1'){
+                            return options.fn(this);
+                       }else{
+                            return options.inverse(this);
+                       }
+                 });                
+                 Handlebars.registerHelper("ifmy", function(v1,options){
+                       if(v1 == 'ModelMyAddThread'){
+                           return options.fn(this);
+                       }
+                 });              
+                var myTemplate = Handlebars.compile( $("#bbs-template").html());
+                $('#bbs-list').html( myTemplate(data) );
+                lodding.hide(); 
+                $('.js-is-hide').show()
+                $('.js-bbs-dispost').click(function(){
+                    var that = $(this);
+                    var fid = that.attr('data-fid');
+                    
+                    if( that.hasClass('i_add') ){
+                         _that.addThead(fid, function(){
+                            that.removeClass('i_add')
+                        });
+                    }else{
+                        _that.minusThead(fid, function(){
+                            that.addClass('i_add')
+                        });
+                    }
+                })
+            },
+            rlink: function(url){
+                var _that = this;
+                return 'http://beihai365.com/phoneapi/'+ url + '&uid='+ _that.uid +'&save_code='+getLocalStorge('save_code');
+            },
+            addThead : function (id, callback){
+                var _that = this;
+                if( _that.uid ){
+                    var url = _that.rlink('index.php?c=operate&m=thread&ac=addthreaduser&fid='+ id );
+                    AJAX.get( url, function(res) {
+                        var res = JSON.parse(res);
+                        console.log(res);
+                        if( res.result == 'success' ){
+                            uexWindow.toast("0", "5", '添加成功', "1000");
+                            callback();
+                        }else{
+                            uexWindow.toast("0", "5", res.msg, "1000");
+                        }
+                    }, function() {
+                        alert('数据获取失败');
+                    });          
+                }else{
+                    localStorage.loginType = 'root';
+                    localStorage.rootType = 'bbs_list';
+                    newOpenWin('login', 'login.html');
+                }
+            },
+            minusThead: function(id, callback){
+                var _that = this;
+                if( _that.uid ){
+                    var url = _that.rlink('index.php?c=operate&m=thread&ac=delthreaduser&fid='+ id );
+                    AJAX.get( url, function(res) {
+                        var res = JSON.parse(res);
+                        
+                        if( res.result == 'success' ){
+                            uexWindow.toast("0", "5", '删除成功', "1000");
+                            callback();
+                        }else{
+                            uexWindow.toast("0", "5", res.msg, "1000");
+                        }
+                    }, function() {
+                        alert('数据获取失败');
+                    });          
+                }else{
+                    localStorage.loginType = 'root';
+                    localStorage.rootType = 'bbs_list';
+                    newOpenWin('login', 'login.html');
+                }                
+            },
+            closeWin: function() {
+                uexWindow.close('-1');
+            },
+            onclick : 0,
+            openSelect : function( b ){
+                var _that = this;
+                _that.onclick++;
+                if(_that.onclick == 1){
+                    openWindow.select( '2',b );
+                    setTimeout(function(){
+                        _that.onclick = 0;    
+                    },500); 
+                }
+                
+            },
+            opMoreBbs: function() {
+                uexWindow.open('forms_list', 0, 'forms_list.html', 2, 0, 0, 1024, 360);
+            }
+        }
+    </script>
+
+</html>

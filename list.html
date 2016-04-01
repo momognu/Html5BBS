@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" href="css/ui-tab.css">
+        <link rel="stylesheet" href="css/ui-base.css">
+        <link rel="stylesheet" href="css/ui-box.css">
+        <link rel="stylesheet" href="css/ui-color.css">
+        <link rel="stylesheet" href="css/ui-res.css">
+        <link rel="stylesheet" href="css/ui-365.css">
+        <script src="js/zy_control.js"></script>
+        <script src="js/zy_click.js"></script>
+        <script src="js/beihai365_comman.js"></script>
+        <script src="js/beihai365_global.js"></script>
+    </head>
+
+    <body class="um-vp c-wh" ontouchstart>
+        <div id="page_0" class="up ub ub-ver" tabindex="0">
+
+            <!--header开始-->
+            <div id="header">
+                <div class="uh c-m15 t-wh ub head_top_home">
+                    <div class="list_back" ontouchstart="zy_touch('click_opacity')" onclick="closeWin();"></div>
+                    <h1 id="form_name" class="ub-f1 ulev5 ut-s tx-c" tabindex="0"></h1>
+                    <div class="list_post_read" id="list_post_read_show" onclick="postBtn();" style=" display:none;"></div>
+                    <div class="list_post_read" id="list_post_read_hide" style=" background:none;"></div>
+                </div>
+                <div class="ub head_top_home listtopbar">
+                    <div class="ub-f1 listtopbar_btn listtopbar_btn_hover" getname="redate">
+                        按回复时间
+                    </div>
+                    <div class="ub-f1 listtopbar_btn " getname="postdate">
+                        按发布时间
+                    </div>
+                    <div class="ub-f1 listtopbar_btn listtopbar_btn_end" getname="top">
+                        置顶帖
+                    </div>
+                </div>
+            </div>
+
+            <!--header结束-->
+
+            <!--content开始-->
+
+            <div id="listcontent" class="ub-f1 tx-l t-bla ub-img6"></div>
+
+            <!--content结束--><!--footer开始-->
+
+            <div id="footer" class="uf c-m14 t-wh" style="display: none;">
+                <div class="footer_365">
+
+                    <!--工具栏开始-->
+
+                    <div class="ub tool_icon">
+                        <div class="ub-f1 tx-c hti-10 w25" ontouchstart="zy_touch('click_opacity')" onclick="fhanniu();">
+                            <span class="f12 tool_text cur">&nbsp;&nbsp;返回&nbsp;&nbsp;</span>
+                        </div>
+                        <div class="ub-f1 tx-c hti-11 w25" ontouchstart="zy_touch('click_opacity')" onclick="reload_list();">
+                            <span class="f12 tool_text cur">&nbsp;&nbsp;刷新&nbsp;&nbsp;</span>
+                        </div>
+                        <!--<div class="ub-f1 tx-c w25" ontouchstart="zy_touch('click_opacity')" id="collect_fid_btn" onclick="sFid.collect_fid_btn();">
+                        <span class="f12 tool_text cur" id="schtml"></span>
+                        </div>-->
+                        <div class="ub-f1 tx-c hti-12 w25" ontouchstart="zy_touch('click_opacity')" onclick="showShare();">
+                            <span class="f12 tool_text cur">&nbsp;&nbsp;分享&nbsp;&nbsp;</span>
+                        </div>
+                    </div>
+
+                    <!--工具栏结束-->
+
+                </div>
+            </div>
+
+            <!--footer结束-->
+
+        </div>
+    </body>
+    <script src="js/zepto.min.js"></script>
+    <script>
+    //谁知道帖子页和版块页谁先到，记录fid。用于浏览记录
+    if(localStorage.browseFid){
+        localStorage.browseFid = localStorage.browseFid +','+ localStorage.fid;
+    }else{
+        localStorage.browseFid = localStorage.fid;
+    }    
+    
+    
+    
+        localStorage.returnType = 'list';
+        localStorage.shareType = 'list';
+        zy_init();
+
+        window.uexOnload = function(type) {
+            if (!type) {
+                if (uexWidgetOne.iOS7Style) {
+                    
+                    $("#header").prepend('<div class="iPhoneBar"></div>');
+                }
+                
+                //监听android返回按钮
+                uexWindow.setReportKey(0,1);
+                uexWindow.onKeyPressed = function(keyCode) {
+                    if (keyCode == 0) {
+                        closeWin();
+                    }
+                };
+
+                //默认非置顶
+                localStorage.iftopped = 'no';
+                //默认是按照最新帖子排序
+                localStorage.order = 1;
+                //标题
+                //$id('form_name').innerHTML = LS.get('form_name');
+                zy_con("listcontent", "list_content.html", 0, $$("header").offsetHeight);
+            }
+
+            window.onorientationchange = window.onresize = function() {
+                zy_resize("listcontent", 0, $$("header").offsetHeight);
+            }
+        }
+        //070 bar click
+        $("#header").on('click', '.listtopbar_btn', function(e) {
+            $(".listtopbar_btn").removeClass("listtopbar_btn_hover");
+            _this = ($(this).attr('getname'));
+            if (_this == 'redate') {
+                $(this).addClass("listtopbar_btn_hover");
+                uexWindow.evaluatePopoverScript("", "listcontent", "get_order(1)");
+            } else if (_this == 'postdate') {
+                $(this).addClass("listtopbar_btn_hover");
+                uexWindow.evaluatePopoverScript("", "listcontent", "get_order(0)");
+            } else {
+                $(this).addClass("listtopbar_btn_hover");
+                uexWindow.evaluatePopoverScript("", "listcontent", "get_order(2)");
+
+            }
+        });
+        /****
+
+         function index_btn(key){
+         if (key == 2) {
+         uexWindow.evaluateScript("root", "0", "index_btn('2')");
+         }else if(key == 6){
+         uexWindow.evaluateScript("root", "0", "index_btn('6')");
+         }
+         else if(key == 7)
+         {
+         uexWindow.evaluateScript("root", "0", "index_btn('7')");
+         }
+         else
+         {
+         uexWindow.evaluateScript("root","0","loadIndex()");
+         }
+         close_window();
+
+         }
+         ***/
+        //收藏版块相关
+        var sFid = {
+            fid : localStorage.fid,
+            uid : localStorage.uid,
+            oCollectFidBtn : $("#collect_fid_btn"),
+            collect_url : beihai365_url + "/index.php?jsoncallback=?&version=" + version + "&c=threads" + "&deviceid=" + localStorage.macAddress,
+            _ShouCanBK : function() {
+                $.getJSON(this.collect_url + '&m=collect_fid' + '&uid=' + this.uid + '&fid=' + this.fid, function(data) {
+                    if (data.result == 'success') {
+                        localStorage.mycollect_boolean = '0'
+                        uexWindow.toast("0", "5", "版块已收藏成功", "3000");
+                    } else {
+                        uexWindow.toast("0", "5", "操作失败，请重试！", "3000");
+                    }
+                });
+
+            },
+            _ShanChuBK : function() {
+                $.getJSON(this.collect_url + '&m=delete_collect_fid' + '&uid=' + this.uid + '&fid=' + this.fid, function(data) {
+                    if (data.result == 'success') {
+                        localStorage.mycollect_boolean = '0'
+                        uexWindow.toast("0", "5", "版块已取消收藏", "3000");
+                    } else {
+                        uexWindow.toast("0", "5", "操作失败，请重试！", "3000");
+                    }
+                });
+            },
+            is_collect_fid : function() {
+                //alert("ddd")
+                //$.getJSON(this.collect_url + '&m=read_iscollect_fid' + '&uid=' + this.uid + '&fid=' + this.fid, function(data){
+                if (localStorage.is_collect_fid == 1) {
+                    sFid.oCollectFidBtn.addClass("hti-8").addClass("hti-7");
+                    $("#schtml").html("已收藏");
+                } else {
+                    sFid.oCollectFidBtn.removeClass("hti-8").addClass("hti-7");
+                    $("#schtml").html("&nbsp;&nbsp;收藏&nbsp;&nbsp;");
+                }
+                //  localStorage.is_collect_fid = data.is_collect_fid;
+                //});
+            },
+            collect_fid_btn : function() {
+                if (localStorage.is_collect_fid == 0) {
+                    sFid._ShouCanBK();
+                    localStorage.is_collect_fid = 1;
+                    sFid.oCollectFidBtn.addClass("hti-8");
+                    $("#schtml").html("已收藏");
+                } else {
+                    sFid._ShanChuBK();
+                    localStorage.is_collect_fid = 0;
+                    sFid.oCollectFidBtn.removeClass("hti-8");
+                    $("#schtml").html("&nbsp;&nbsp;收藏&nbsp;&nbsp;");
+                }
+            }
+        }
+        function reload_list() {
+            uexWindow.evaluatePopoverScript("list", "listcontent", "Thread.flush_threads(" + localStorage.fid + ")");
+            Util.moveTop();
+        }
+
+        function postshow(obj) {
+            if (obj == '1') {
+                $("#list_post_read_show").show();
+                $("#list_post_read_hide").hide();
+                /*
+                .click(function(){
+                    alert("dd")
+                    
+                    
+                });;
+                */
+            }
+        }
+
+        function setListTitle(s) {
+            if (s) {
+                $("#form_name").html(s);
+            }
+        }
+
+        function postBtn() {
+            var uid = localStorage.uid;
+            var username = localStorage.username;
+            if (!uid) {
+                uexWindow.open('login', '0', 'login.html', '10', '100%', '100%', '0');
+            } else {
+                uexWindow.open('post', '0', 'post.html', '10', '100%', '100%', '0');
+            }
+        }
+
+        function postretun() {
+            uexWindow.alert("帖子已发布成功！", "帖子要经过审核才能显示出来，稍后请刷新版块页面查看。", "我知道了")
+        }
+
+        function fhanniu() {
+            close_window();
+        }
+
+        //打开分享窗口
+        function showShare() {
+            //分享赋值
+            localStorage.shareUrl = "http://m.beihai365.com/thread.php?fid=" + localStorage.fid;
+            localStorage.shareTitle = '来北海365和我一起泡' + localStorage.form_name + '版吧~';
+            localStorage.shareContent = '我正在使用北海365网手机客户端看【' + localStorage.form_name + '】的帖子，感觉不错哦，你也来看看吧！查看链接：' + localStorage.shareUrl;
+            localStorage.shareType = "sinlge";
+            uexWindow.openPopover("shares", 0, "shares.html", '', 0, 0, 0, 0, '', 0, 0);
+        }
+        function closeWin(){
+            localStorage.listWindowId = parseInt(parseInt(localStorage.listWindowId) - 1);
+            uexWindow.close('-1');
+        }
+
+    </script>
+</html>

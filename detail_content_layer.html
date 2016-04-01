@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" href="css/ui-tab.css">
+        <link rel="stylesheet" href="css/ui-base.css">
+        <link rel="stylesheet" href="css/ui-box.css">
+        <link rel="stylesheet" href="css/ui-color.css">
+        <link rel="stylesheet" href="css/ui-res.css">
+        <link rel="stylesheet" href="css/ui-365.css">
+        <script src="js/zepto.min.js"></script>
+        <script src="js/beihai365_comman.js"></script>
+        <script src="js/beihai365_global.js"></script>
+        <script src="js/zy_control.js"></script>
+        <script src="js/zy_click.js"></script>
+    </head>
+    <body class="um-vp">
+        <div id="page" class="up ub ub-ver" tabindex="0">
+            <!--header开始-->
+            <div id="header">
+                <div class="ub ub-ac read-layer-header">
+                    <div class=" ub-f1">
+                        <div class="read-header-left ub ub-ac">
+                            <span class="read-header-back" ontouchstart="zy_touch('click_opacity')" onclick="closePage();"></span>
+                            <span class="read-header-title" id="read-header-title"></span>
+                        </div>
+                    </div>
+                    <div class="read-header-right ub ub-ac">
+                        <div class="read-header-tiedan" ontouchstart="zy_touch('click_opacity')" onclick="openTiedan()">
+                            <span>帖单</span>
+                        </div>
+                        <div class="read-header-share" ontouchstart="zy_touch('click_opacity')" onclick="showShare();">
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--header结束-->
+            <!--content开始-->
+
+            <!--content结束--><!--footer开始-->
+
+            <!--content结束-->
+            <!--footer开始-->
+
+        </div>
+
+        <!--footer结束-->
+        </div>
+
+    </body>
+
+    <script>
+        var $winName;
+        window.uexOnload = function(type) {
+            $winName = ("detail" + localStorage.detailWindowId);
+            if (uexWidgetOne.iOS7Style) {
+                $(".read-layer-header").css({
+                    "padding-top" : "1.25rem"
+                });
+            }
+        }
+        function closePage() {
+            uexWindow.evaluateScript($winName, 0, "closeWin();");
+        }
+        function openTiedan(){
+            uexWindow.evaluateScript($winName, 0, "goPopoverScript('openTiedan()')");
+            //goPopoverScript
+        }
+        function showShare(){
+            uexWindow.evaluateScript($winName, 0, "_showShare()");
+        }
+    </script>
+
+</html>

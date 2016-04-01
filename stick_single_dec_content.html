@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" href="css/ui-base.css">
+        <link rel="stylesheet" href="css/ui-box.css">
+        <link rel="stylesheet" href="css/ui-color.css">
+        <link rel="stylesheet" href="css/ui-res.css">
+        <link rel="stylesheet" href="css/ui-365.css">
+        <link rel="stylesheet" href="css/ui-single.css">
+        <script src="js/zepto.min.js"></script>
+        <script src="js/beihai365_comman.js"></script>
+        <script src="js/beihai365_global.js"></script>
+        <script src="js/zy_control.js"></script>
+        <script src="js/zy_click.js"></script>
+        <script></script>
+    </head>
+    <!-- 贴单详情  列表-->
+    <body class="um-vp bg365" ontouchstart>
+        <div id="page_0" class="up ub ub-ver" tabindex="0">
+            <section class="head_single" id="head-single"></section>
+            <section class="single_dec_ul">
+                <ul id="creatHtml">
+                    <div class="loading">
+                        <img src="css/img/loadding.png" class="loadimg" />
+                        <p class="c_grey_66 f14">
+                            正在加载中
+                        </p>
+                    </div>
+                </ul>
+            </section>
+
+            <!-- 操作 -->
+            <section class="poule_bg hide js-pouple">
+                <ul class="pouple_ul js-operation">
+                    <li data-operation="edit">
+                        编辑
+                    </li>
+                    <li data-operation="del">
+                        删除
+                    </li>
+                </ul>
+            </section>
+
+            <!-- 操作 -->
+            <section class="poule_bg hide js-pouple-del">
+                <div class="js-del-wap del_wap">
+                    <h1 class="del_h1 js-del-title">删除帖单</h1>
+                    <p class="c_grey_66 f16 js-del-desc">
+                        确定要删除该帖单么？
+                    </p>
+                    <div class="ub del_text">
+                        <p class="ub-f1 js-true-btn">
+                            删除
+                        </p>
+                        <p class="ub-f1 js-close">
+                            取消
+                        </p>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <script>
+            var uid = localStorage.uid,
+                cid = localStorage.singleCid,
+                isinv = localStorage.ifCreatorInv,
+                isMeNot = true;
+            //新建贴单进来的详情。
+            //窗口ID
+            var $winName = ("single-dec" + localStorage.tiedanDecWindowId);
+
+            var tidanuid = '';
+            //该贴单的作者
+
+            //分享所需要的
+            var sharefollow_num = '0',
+                sharetitle = '',
+                sharelistnum = 0,
+                shareOneTie = "";
+
+            window.uexOnload = function(type) {
+                if (!type) {
+                    //监听侧滑
+                    uexWindow.onSwipeRight = function() {
+                        //uexWindow.evaluateScript($winName, 0, "closeWin();");
+                    }
+                    onloadHtml.createHtml();
+                }
+            }
+            //创建html
+            onloadHtml = {
+                forFun : function(posts) {
+                    var _this = this;
+                    var html = '';
+
+                    var isinvhtml = '<div class="clearfix single_operation1 js-del-wwww" >' + '<p class="f14 js-del-nosave fr"><span class="single_icon_d"></span>删除 </p>' + '</div>';
+
+                    for (var i = 0; i < posts.length; i++) {
+                        var onedata = posts[i];
+                        var userimg = _this.getImge(onedata.authorid);
+                        /*加精*/
+                        var digest = '';
+
+                        if (onedata.digest == '1' || onedata.digest == '2' || onedata.digest == '3') {
+                            digest = '<p class="sing_label"></p><p class="sing_text">精</p>'
+                        }
+
+                        var replies = onedata.replies != '0' ? '<span class="sible_pl">' + onedata.replies + '</span>' : '';
+                        var imgurl = onedata.imgurls ? '<div class="w_80" style="background-image:url(' + onedata.imgurls + '?imageView/2/w/100)"></div>' : '';
+
+                        var content = onedata.content.length > 0 ? onedata.content.replace(/^(\s|&nbsp;)+/g, "") + '...' : '';
+
+                        html += '<li data-tid="' + onedata.tid + '">' + '<div class="pb10" onclick="openMySingleDec(' + onedata.tid + ')" >' + digest + '<div class="ub single_p">' + '<div class="ub-f1">' + '<h1 class="c_grey_66 f16 fontw">' + onedata.subject + '</h1>' + '<h2 class="f14 mt5 fontw">' + content + '</h2>' + '</div>' + imgurl + '</div>' + '<div class="ub mt10 f14 ub-ac single_p">' + '<div class="ub-f1"><span class="single_img ">' + userimg + '</span>' + onedata.author + '</div>' + '<div class="ub-f1 tar">' + replies + '</div>' + '</div>' + '</div>' + '<div class="ub ub-ac hide single_operation js-all-oper" data-tid="' + onedata.tid + '">' + '<div class="ub-f1 js-stick-btn">' + '<p class="f14"><span class="single_icon"></span>移到顶部</p>' + '</div>' + '<div class="ub-f1">' + '<p class="f14 js-del-paste"><span class="single_icon single_1"></span>删除 </p>' + '</div>' + '</div>' + '</li>'
+                    }
+                    localStorage.decMian = html;
+                    html = $(html);
+                    if (isinv == 'true') {
+                        uexWindow.toast("0", "5", '添加成功', "2000");
+                        $(html).eq(0).append(isinvhtml);
+                        reload.rehead(1);
+                        //uexWindow.evaluateScript($winName, 0, "setTitle(1)");
+                    }
+                    return html;
+                },
+                url : reLink('/index.php?c=threadslist&do=posts_list&cid=' + cid),
+                getImge : function(uid) {
+                    var getimgurl = 'http://www.beihai365.com/plugins/appserver/users.php?do=getfaceimg&uid=' + uid;
+                    var getimg = '<img src="' + getimgurl + '" class="wimg_100" />';
+                    return getimg;
+                },
+                createHtml : function() {
+                    var _this = this;
+                    //摘取数据
+                    AJAX.get(_this.url, function(data) {
+
+                        var data = JSON.parse(data);
+                        console.log(data);
+                        if (data.result == 'success') {
+
+                            if (data.data <= 0) {
+                                $('#creatHtml').html('<p class="tac mt10">该贴单还没有帖子哦，快去看帖添加吧</p>');
+                                return;
+                            }
+
+                            //头部内容
+                            var collection = data.data.collection_data;
+                            tidanuid = collection.uid;
+                            //记住
+
+                            localStorage.singleName = collection.collection_name;
+
+                            var collection_num = collection.follow_num != '0' ? '<span class="f14">/' + collection.follow_num + '人关注</span>' : '';
+
+                            var collectionHtml = '<p class="f22 tac js-edit-title">' + collection.collection_name + '</p>' + '<div class="head_w">' + '<span class="single_img">' + _this.getImge(collection.uid) + '</span>' + '<span class="f14">' + collection.username + '</span>' + collection_num + '</div>' + '<p class="edit_title hide js-edit-btn" data-colleid="' + collection.collection_id + '" data-title="' + collection.collection_name + '" ontouchstart="zy_touch(click_opacity)" >编辑标题</p>' + '<p class="follow_btn js-follow-btn hide" data-colleid="' + collection.collection_id + '"><span class="follow_icon"></span>关注帖单</p>';
+
+                            $('#head-single').html(collectionHtml);
+                            localStorage.decHtml = collectionHtml;
+
+                            //列表内容
+                            var posts = data.data.posts_list;
+
+                            var html = _this.forFun(posts);
+                            operate.clickfun(html);
+                            //判断是否是自己的
+                            operate.ifSelfFun(html);
+                            $('#creatHtml').html(html);
+
+                            //分享需要
+                            sharefollow_num = collection.follow_num;
+                            sharetitle = collection.collection_name;
+                            sharelistnum = posts.length;
+                            shareOneTie = posts[0].subject
+
+                            //alert(shareOneTie)
+                            share.setText();
+
+                        } else {
+                            $('#creatHtml').html('<p class="tac mt10">该贴单还没有帖子哦，快去看帖添加吧</p>');
+                        }
+                    }, function() {
+                        alert('数据获取失败');
+                    })
+                }
+            }
+
+            //自己贴单能进行的操作
+            operate = {
+                delarray : {
+                    delpaste : {
+                        'title' : '删除贴子',
+                        'describe' : '确定要删除该帖子么？',
+                        'posturl' : '/index.php?c=threadslist&do=del_post'
+                    },
+                    delsingle : {
+                        'title' : '删除帖单',
+                        'describe' : '确定要删除该帖单么？',
+                        'posturl' : '/index.php?c=threadslist&do=del_collection'
+                    }
+
+                }, //删除操作
+                delfun : function(sign, tid, that) {
+                    var _this = this;
+                    var onedata = _this.delarray[sign];
+                    $('.js-del-title').html(onedata.title);
+                    $('.js-del-desc').html(onedata.describe);
+                    $('.js-pouple-del').removeClass('hide');
+                    ifnomeove = true;
+                    var posturl = onedata.posturl + '&cid=' + cid;
+
+                    if (tid) {
+                        //删除帖单里的帖子
+                        var posturl = onedata.posturl + '&cid=' + cid + '&tid=' + tid + 'id&category=0';
+                    }
+
+                    posturl = reLink(posturl);
+
+                    $('.js-true-btn').click(function() {
+                        AJAX.get(posturl, function(data) {
+                            var data = JSON.parse(data);
+                            console.log(data);
+                            if (data.result == 'success') {
+
+                                uexWindow.toast("0", "5", '删除成功', "2000");
+
+                                if (sign == 'delsingle') {
+                                    //删除帖单，回到上一个页面
+                                    localStorage.ifcreate = 'create';
+                                    reload.relist();
+                                    reload.rehead(6)
+                                } else {
+                                    localStorage.delpate = 'del';
+                                    reload.relist();
+                                    that.parents('li').remove();
+                                }
+
+                                $('.js-pouple-del').addClass('hide');
+                                ifnomeove = false;
+
+                            } else {
+                                uexWindow.toast("0", "5", data.msg, "2000");
+
+                            }
+                        }, function() {
+                            alert('数据获取失败');
+                        })
+                    })
+                }, //判断是否是自己的
+                ifSelfFun : function(html) {
+                    var _this = this;
+
+                    //显示别人的帖单
+                    if (tidanuid != localStorage.uid) {
+
+                        //隐藏掉设置
+                        reload.rehead(2);
+                        var iffollow = reLink('/index.php?c=threadslist&do=if_follow&cid=' + cid);
+
+                        //关注之后的内容需要修改
+
+                        if (localStorage.uid) {
+                            AJAX.get(iffollow, function(data) {
+                                var data = JSON.parse(data);
+                                //console.log(data)
+                                if (data.result == 'success') {
+                                    reload.rehead(3);
+
+                                    //uexWindow.evaluateScript($winName, 0, "setfollowed(0)");//关注成功
+                                    $('.js-follow-btn').addClass('hide');
+                                } else {
+                                    reload.rehead(4);
+                                    $('.js-follow-btn').removeClass('hide');
+                                }
+                            }, function() {
+                                alert('数据获取失败');
+                            })
+                        } else {
+
+                            reload.rehead(4);
+
+                            $('.js-follow-btn').removeClass('hide');
+                        }
+
+                    }
+                    //添加进来 的页面
+                    if (isinv == 'true' && tidanuid == localStorage.uid) {
+                        reload.rehead(5);
+                        reload.retitle();
+
+                        //uexWindow.evaluateScript($winName, 0, "rightBtn(0);");
+
+                        //关掉那个标题页
+                        //uexWindow.evaluateScript("single-title", 0, "closeSelf();");
+
+                        $('.js-del-nosave', html).click(function() {
+                            var that = $(this);
+                            localStorage.ifCreatorInv = false;
+                            var tid = that.parents('li').attr('data-tid');
+                            _this.delfun('delpaste', tid, that);
+                        })
+                    }
+                }, //贴单里的操作
+                clickfun : function(html) {
+                    var _this = this;
+                    //这些都是处理别人的帖单
+                    //关注帖单
+                    $('.js-follow-btn').click(function() {
+                        // console.log( uid.toValue() )
+                        if (localStorage.uid) {
+                            var followurl = reLink('/index.php?c=threadslist&do=follow_collection&cid=' + cid);
+                            var that = $(this);
+                            AJAX.get(followurl, function(data) {
+                                var data = JSON.parse(data)
+                                if (data.result == 'success') {
+
+                                    that.addClass('hide');
+
+                                    //uexWindow.evaluateScript($winName, 0, "setfollowed(0)");//关注成功
+                                    //var listWinName = ("single-list" + localStorage.tiedanWindowId );
+                                    //console.log(listWinName);
+                                    //uexWindow.evaluateScript(listWinName, 0, "onloadHtml.createHtml()");
+
+                                    reload.rehead(3);
+                                    reload.relist();
+
+                                    uexWindow.toast("0", "5", '关注成功', "2000");
+                                    $('.js-follow-btn').addClass('hide');
+                                    $('.js-followed').removeClass('hide');
+                                } else {
+                                    uexWindow.toast("0", "5", data.msg, "2000");
+                                }
+                            }, function() {
+                                alert('数据获取失败');
+                            })
+                        } else {
+                            localStorage.returnType = 'followsingle';
+                            localStorage.loginType = $winName;
+                            newOpenWin('login', 'login.html');
+
+                        }
+                    })
+                    //这些都是处理自己的帖单
+                    reload.rehead(7);
+                    $('.js-set-btn').click(function() {
+                    })
+
+                    $('.js-operation').on('click', 'li', function(e) {
+                        e.stopPropagation();
+                        var that = $(this);
+                        var operating = that.attr('data-operation')
+                        $('.js-pouple').addClass('hide');
+                        if (operating == 'edit') {
+                            //编辑自己的
+                            ifnomeove = false;
+                            uexWindow.open('single-decOperate', '0', 'stick_single_decOperate.html', '12', '', '', '4');
+                        } else {
+                            _this.delfun('delsingle');
+                        }
+                    })
+
+                    $('.js-close,.js-pouple,.js-pouple-del').click(function() {
+
+                        var per = $(this).parents('.js-pouple-del').length != 0 ? $(this).parents('.js-pouple-del') : $(this);
+                        per.addClass('hide');
+                        ifnomeove = false;
+                    })
+                },
+                successFollew : function() {
+                    //从其它地方进来 ，取消成功之后要调用的事件
+                    $('.js-follow-btn').removeClass('hide');
+                }
+            }
+
+            // 以下主要用来消除沙发里浏览器的滚动事件
+
+            $('body').bind('touchmove', function(e) {
+                if (ifnomeove) {
+                    e.preventDefault();
+                }
+            });
+
+            //来自父窗口的点击
+            function _setBtn(hh) {
+                var st = $(window).scrollTop();
+                var h = $('html').height();
+                var winh = $(window).height();
+
+                if (winh > h) {
+                    h = winh;
+                }
+                $('.js-pouple').height(h).removeClass('hide');
+
+                //alert(hh);
+                $('.js-operation').css('top', st + winh - (~~ $('.js-operation').height() ));
+                ifnomeove = true;
+            }
+
+            function openMySingleDec(tidsing) {
+                if (isMeNot) {
+
+                    localStorage.cid = cid;
+                    openWindow.select('3', tidsing);
+                } else {
+                    uexWindow.toast("0", "5", '您处于预览状态，无法跳转~', "2000");
+                }
+            }
+
+            var share = {
+                setText : function() {
+                    //分享赋值
+                    var srhredec = ~~(sharefollow_num) > 0 ? '，有' + sharefollow_num + '人正在关注' : '';
+
+                    localStorage.shareUrl = "http://m.beihai365.com/tiedan.php?cid=" + cid;
+                    //标题
+                    localStorage.shareTitle = "" + sharetitle + "";
+                    //localStorage.shareContent = "该帖单收集了" + sharelistnum + "个帖子" + srhredec;
+                    localStorage.shareContent = "最新帖子：" + shareOneTie;
+                    localStorage.shareType = "sinlgeDec";
+                }
+            }
+
+            //更新贴单后刷新其它页面
+            reload = {
+                'relist' : function() {//list页的更新
+                    var listWinName = ("single-list" + localStorage.tiedanWindowId );
+                    uexWindow.evaluateScript(listWinName, 0, "onloadHtml.createHtml()");
+
+                    if (localStorage.shareType == 'detail') {
+                        var reName1 = ("detail" + localStorage.detailWindowId);
+                        localStorage.isload = true;
+                        uexWindow.evaluateScript(reName1, 0, "oRead.loadData(0, true , 1)");
+                    }
+                    if (localStorage.delpate == 'del') {
+                        var reName = ("detail" + localStorage.detailWindowId);
+                        uexWindow.evaluatePopoverScript(reName, "detail_content", "oRead.loadData(0, true , 1)");
+                    }
+
+                    if (localStorage.returnType == 'me_index') {
+                        uexWindow.evaluateScript("root", 0, "login('me_index');");
+                    }
+                },
+                'rehead' : function(num) {//自己头部的更新
+                    switch(num) {
+                    case 1:
+                        //修改头部的标题
+                        uexWindow.evaluateScript($winName, 0, "setTitle(1)");
+                        break;
+                    case 2:
+                        //隐藏掉设置
+                        uexWindow.evaluateScript($winName, 0, "setTitle(0)");
+                        break;
+                    case 3:
+                        //关注成功
+                        uexWindow.evaluateScript($winName, 0, "setfollowed(0)");
+                        break;
+                    case 4:
+                        //不关注
+                        uexWindow.evaluateScript($winName, 0, "setfollowed(1)");
+                        break;
+                    case 5:
+                        //
+                        uexWindow.evaluateScript($winName, 0, "rightBtn(0);");
+                        break;
+                    case 6:
+                        //关闭自己
+                        uexWindow.evaluateScript($winName, 0, "closeWin()");
+                        break;
+                    case 7:
+                        //自己的帖单
+                        uexWindow.evaluateScript($winName, 0, "rightBtn(1);");
+                        break;
+                    default:
+                        break;
+                    }
+                },
+                'retitle' : function() {//title的更新
+                    isMeNot = false;
+                    //alert("ddd")
+                    //关掉那个标题页(不要在这里关闭，IOS下有问题)
+                    //uexWindow.evaluateScript("single-title", 0, "closeSelf();");
+                }
+            }
+
+        </script>
+    </body>
+</html>

@@ -1,0 +1,227 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1.0, user-scalable=no" />
+        <link rel="stylesheet" href="css/ui-tab.css">
+        <link rel="stylesheet" href="css/ui-base.css">
+        <link rel="stylesheet" href="css/ui-box.css">
+        <link rel="stylesheet" href="css/ui-color.css">
+        <link rel="stylesheet" href="css/ui-res.css">
+        <link rel="stylesheet" href="css/ui-365.css">
+        <link rel="stylesheet" href="css/ui-search.css">
+        <script src="js/zy_control.js"></script>
+        <script src="js/zy_click.js"></script>
+        <script src="js/beihai365_comman.js"></script>
+        <script src="js/beihai365_global.js"></script>
+        <script src="js/zepto.min.js"></script>
+        <script src="js/md5.js"></script>
+
+    </head>
+    <body class="um-vp c-wh" ontouchstart>
+        <div id="page_0" class="up ub ub-ver" tabindex="0">
+
+            <section class="search_record f14" id="search_history" title="搜索历史" ></section>
+
+            <section class="search_record f14 " id="search_list" title="搜索列表" style="display: none">
+                <div class="kantie" id="search_list_item"></div>
+
+                <div class="ub ub-pc " id="pullup"></div>
+
+            </section>
+
+            <section class="search_record f14" id="search_tips" title="搜索提示" style="display: none">
+
+            </section>
+        </div>
+    </body>
+
+    <script type="text/javascript">
+        zy_init();
+        var $soURL = "http://so.beihai365.com/app_searcher.php?keyword="
+        var $soKey = "";
+        var $soKeyArr = new Array();
+        var $pageNum = 1;
+        window.uexOnload = function(type) {
+            if (!type) {
+                init();
+                
+                //
+                //加载历史记录
+            }
+
+        }
+        function init() {
+            if (localStorage.soKeyType == 1) {
+                $soKey = localStorage.searchKey;
+                showSearchView($soKey);
+            } else {
+                getHistory();
+            }
+        }
+
+        function showSearchText() {
+            /*
+             $("#search_history").show();
+             $("#search_list").hide();
+             $("#search_tips").hide();
+             */
+        }
+
+        //加载历史记录
+        function getHistory() {
+            if (localStorage.soKeyArrLS) {
+                //alert(localStorage.soKeyArrLS.split(","))
+                $soKeyArr = localStorage.soKeyArrLS.split(",");
+                getHistoryView($soKeyArr);
+            }
+        }
+
+        function getHistoryView(data) {
+            var view = "<ul>";
+            for (var i = 0; i < data.length; i++) {
+                var re = data[i];
+                if (re) {
+                    view += '<li onclick="showSearchView(\'' + re + '\')">' + re + '</li>';
+                }
+            };
+            view += '<li class="del_icon tac" onclick="killHistory()">清除历史记录</li></ul>';
+            $("#search_history").html(view);
+        }
+
+        function setHistory(key) {
+            /*保存历史记录*/
+            $soKeyArr.length = 9;
+            //最大10个
+            //先去重复
+            for (var i = 0; i < $soKeyArr.length; i++) {
+                if ($soKeyArr[i] == key) {
+                    $soKeyArr.splice(i, 1);
+                }
+            };
+            //添加到数组的前面
+            $soKeyArr.unshift(key);
+            localStorage.soKeyArrLS = $soKeyArr;
+
+            getHistoryView($soKeyArr);
+            /*保存历史记录结束*/
+            //alert(localStorage.soKeyArrLS)//打印新数组
+        }
+
+        function killHistory() {
+            getHistoryView([]);
+            localStorage.soKeyArrLS = [];
+            $soKeyArr = [];
+            $("#search_history").hide();
+            $("#search_list").hide();
+            $("#search_tips").hide();
+            //alert(localStorage.soKeyArrLS )
+        }
+
+        function showSearchView(key) {
+            if (key) {
+                lodding.show();
+                uexWindow.evaluateScript("search", "0", "setInput('" + key + "')");
+                $soKey = key;
+                setHistory(key);
+                AJAX.get(encodeURI($soURL + key), function(res) {
+                    getView(res);
+                    lodding.hide();
+                    uexInit();
+                }, function() {
+                    lodding.hide();
+                    $("#search_history").hide();
+                    $("#search_list").hide();
+                    $("#search_tips").html('<div class="ub ub-pc"><div class="search_tips_icon">拉取数据失败了，再试一下吧！</div></div>').show();
+
+                });
+
+            }
+        }
+
+        function pullupData() {
+            AJAX.get(encodeURI($soURL + $soKey + "&pagenum=" + $pageNum), function(res) {
+                getView(res, 1);
+
+            }, function() {
+                $("#search_history").hide();
+                $("#search_list").hide();
+                $("#search_tips").html('<div class="ub ub-pc"><div class="search_tips_icon">拉取数据失败了，再试一下吧！</div></div>').show();
+            });
+        }
+
+        function getView(res, type) {
+            var data = JSON.parse(res);
+            if (data.length == 0) {
+                if (type == 1) {
+                    $('#pullup').html('没有内容了');
+                    uexWindow.resetBounceView("1");
+                } else {
+                    $("#search_history").hide();
+                    $("#search_list").hide();
+                    $("#search_tips").html('<div class="ub ub-pc"><div class="search_tips_icon">没有搜索到标题中含有“' + $soKey + '”的帖子</div></div>').show();
+                }
+            } else {
+                var getHtml = "";
+                for (var i = 0; i < data.length; i++) {
+                    var re = data[i]
+                    getHtml += getItem(re);
+                }
+                $("#search_history").hide();
+                $("#search_list").show();
+                $("#search_tips").hide();
+                if (type == 1) {
+                    $('#pullup').html('上拉加载更多');
+                    uexWindow.resetBounceView("1");
+                    $("#search_list_item").append(getHtml);
+                } else {
+                    $("#search_list_item").html(getHtml);
+                }
+            }
+        }
+
+        function getItem(data) {
+            var rekey = data;
+            var reHTML = "";
+            var isNew = rekey.is_new == 1 ? ' newIcon' : '',
+                isHot = rekey.digest == 1 ? ' jingIcon' : '',
+                isJing = rekey.hot == 1 ? ' hotIcon' : '';
+            reHTML += '<section class="has_action' + isNew + isHot + isJing + '">' + '<a href="javascript:zy_touch(\'click_opacity\')" onclick="openWindow.select(3,' + rekey.tid + ')" class="article_link clearfix"> <h3>' + rekey.subject + '</h3>' + '<div class="item_info"> ' + '<span class="src space">' + rekey.name + '</span> ' + '<span class="cmt">' + rekey.hits + '/' + rekey.replies + '</span> ' + '<span class="author">' + rekey.author + '</span> ' + '<span class="time fr canhide">' + rekey.postdate + '</span> ' + '</div> </a> ' + '</section>';
+            return reHTML;
+        }
+
+        function uexInit() {
+            $('#pullup').addClass('pullup').html('上拉加载更多');
+            //打开上拉加载
+            uexWindow.setBounce(1);
+            uexWindow.notifyBounceEvent(1, 1);
+            var jsonDownBounce = '{"textColor":"#e7e7e7","imagePath":"","levelText":"松手加载下一页o(∩_∩)o ","pullToReloadText":"","releaseToReloadText":"","loadingText":""}';
+            uexWindow.setBounceParams(1, jsonDownBounce);
+            uexWindow.showBounceView("1", "#ffffff", 0);
+            uexWindow.onBounceStateChange = onBounceStateChange;
+        }
+
+        function onBounceStateChange(type, state) {
+            switch(type) {
+            case 1:
+                if (state == 0) {
+                    $('#pullup').html('继续向上拉加载下一页');
+                }
+                if (state == 1) {
+                    $('#pullup').html('松开加载下一页内容');
+                }
+                if (state == 2) {
+
+                    $('#pullup').html('加载中...');
+                    $pageNum += 1;
+                    pullupData();
+
+                    //oScroll.scrollUpend();
+                }
+                break;
+            }
+        }
+
+    </script>
+</html>

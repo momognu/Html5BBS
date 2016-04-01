@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" href="css/ui-input.css">
+        <link rel="stylesheet" href="css/ui-base.css">
+        <link rel="stylesheet" href="css/ui-box.css">
+        <link rel="stylesheet" href="css/ui-color.css">
+        <link rel="stylesheet" href="css/ui-365.css">
+        <script src="js/zy_control.js"></script>
+        <script src="js/zy_click.js"></script>
+        <script src="js/beihai365_comman.js"></script>
+        <script src="js/beihai365_global.js"></script>
+        <script src="js/zepto.min.js"></script>
+        <script src="js/jquery.mobile.custom.min.js">
+        </script>
+        <script src="js/laytpl.js"></script>
+        <script type="text/javascript" src="js/iscroll-probe.js"></script>
+    </head>
+
+    <body class="um-vp homebg_c">
+
+        <div id="formsList_left" style="display: none">
+            <div id="scroller_left">
+                
+                <div id="leftHTML"></div>
+            </div>
+        </div>
+
+        <div id="formsList" class="scroller" style="display: none">
+            
+        </div>
+    </body>
+
+    <script>
+        zy_init();
+        window.uexOnload = function(type) {
+            if (!type) {
+                uexWindow.setBounce("0");
+                localStorage.returnType = "bbs"
+
+                lodding.show();
+                getData();
+            }
+        }
+        //滚动
+        var myScroll;
+        var myScroll_left;
+
+        function loaded() {
+            myScroll = new IScroll('#formsList', {
+                mouseWheel : true,
+                momentum : false,
+                bounce : false,
+                click : true
+
+            });
+            myScroll_left = new IScroll('#formsList_left', {
+                mouseWheel : true,
+                bounce : false,
+                momentum : false,
+                click : true
+            });
+      
+
+            //var hhhh = 0; 
+            var arrHeight = new Array(),arrID = new Array();
+
+            
+            //第一个样式
+            $('#leftHTML li:nth-child(1)').addClass("selected");
+            
+
+        }
+        //获取数据
+        function getData() {
+            console.log(reLink('/index.php?c=threads&m=threadsentry'));
+            AJAX.get(reLink('/index.php?c=threads&m=threadsentry'), function(res) {
+                localStorage.setItem("reThreadsData", res);
+                loadNode();
+                lodding.hide();
+            }, function() {
+                alert('数据获取失败');
+            });
+        }
+        //存放内容
+        var  htmlwar = {};
+        function loadNode(){
+            $("#formsList_left").show();
+            $("#formsList").show();
+            //转换JSON
+            var reData = (JSON.parse(localStorage.getItem("reThreadsData")));
+            //渲染左侧模板
+            var lefttpl = "<ul>";
+            for (var i=0; i < reData.channel.length; i++) {
+                var re = reData.channel[i];
+                lefttpl+='<li id="big_'+re.id+'"><a href="javascript:goRightid(\''+re.id+'\')">'+re.tname+'</a></li>';
+            };
+            lefttpl+='</ul>';
+            
+            document.getElementById('leftHTML').innerHTML = lefttpl;
+            
+            //右侧
+            for (var i=0; i < reData.forums.length; i++) {
+                var rekey = reData.forums[i];
+                var righttpl = '<div id="is_'+rekey.id+'"><ul>';           
+                for (var k=0; k < rekey.forums.length; k++) {
+                    var re = rekey.forums[k];
+                    righttpl+='<li>'+
+                                    '<a><div class="scroller-li">'+
+                                        '<strong  onclick="javascript:openSelect(2,'+re.url+')">'+re.name+'</strong>'+
+                                        '<p class="bbs_i i_add" onclick="disposeThead('+re.url+');"><span></span></p>'+
+                                    '</div></a>'+
+                                '</li>'
+               
+                }
+              righttpl+='</ul></div>';
+              htmlwar[rekey.id] = righttpl;
+            };
+
+            document.getElementById('formsList').innerHTML = htmlwar[217];
+            loaded();
+        }
+        
+        var aaa = 0;
+        function openSelect(a,b){
+            aaa++
+            if(aaa == 1){
+                openWindow.select(a,b);
+                setTimeout(function(){
+                    aaa = 0;    
+                },500); 
+            }
+            
+        }
+        function reCount(count){
+            if(count > 0){
+                return count > 99 ? '<number>99+</number>':'<number>'+ count +'</number>'
+            }
+            return "";
+        }
+        var bigid = null;
+        function reBigid(s){
+            if(bigid != s){
+               bigid = s;
+               return 'mark="'+s+'" id="isid_'+s+'" class="bigidHeight"';  
+            }else{
+               return 'mark="'+s+'" class="bigidHeight"';  
+            }
+            
+        }
+        
+        function goRightid(id){
+            document.getElementById('formsList').innerHTML =  htmlwar[id];
+            myScroll = new IScroll('#formsList', {
+                mouseWheel : true,
+                momentum : false,
+                bounce : false,
+                click : true
+
+            });
+            $("#leftHTML li").removeClass("selected");
+            $('#big_'+id).addClass("selected");
+        }
+        
+        function disposeThead(id){
+            var url = 'http://beihai365.com/phoneapi/index.php?c=operate&m=thread&ac=addthreaduser&uid='+ getLocalStorge('uid') +'&fid='+ id +'&save_code='+getLocalStorge('save_code');
+            
+            AJAX.get( url, function(res) {
+                console.log(res);
+            }, function() {
+                alert('数据获取失败');
+            });
+        }
+        function goList(s){
+
+        }
+    </script>
+
+</html>

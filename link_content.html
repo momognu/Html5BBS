@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>
+    </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" href="css/ui-base.css">
+    <link rel="stylesheet" href="css/ui-box.css">
+    <link rel="stylesheet" href="css/ui-color.css">
+    <link rel="stylesheet" href="css/ui-365.css">
+    <script src="js/zy_control.js"></script>
+    <script src="js/zy_click.js"></script>
+    <script src="js/beihai365_comman.js"></script>
+    <script src="js/beihai365_global.js"></script>
+    <script src="js/zepto.min.js"></script>
+  </head>
+<body class="um-vp" ontouchstart>
+</body>
+<script>
+
+window.uexOnload = function(type){
+	if (!type) {
+		uexWindow.setBounce("0");
+	}
+	
+	
+	var url = localStorage.goOpenUrl;
+	var re = /(.*?).com(.*?)/gi;
+	if(url.match(re) == 'http://www.beihai365.com'){
+		url = 'http://m.beihai365.com'+url.replace(re, '')
+	} 
+	
+    //IOS设备
+    if( url.match(re) == 'http://www.xinxi.beihai365.com' || url.match(re) == 'http://xinxi.beihai365.com' ){
+        var ifip = uexWidgetOne.getPlatform();
+        if ( !ifip ) {
+            lodding.show();
+        }
+        url = 'http://beihai365.com/m/iphonetest/app/centre.html';
+    } 
+    
+    location.href = url;
+	        
+    //location.href = localStorage.tzwy;
+	//$("#linkMain").attr({"src":url});
+
+    
+}
+
+
+</script>

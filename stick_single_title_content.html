@@ -1,0 +1,222 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1.0, user-scalable=no" />
+        <link rel="stylesheet" href="css/ui-tab.css">
+        <link rel="stylesheet" href="css/ui-base.css">
+        <link rel="stylesheet" href="css/ui-box.css">
+        <link rel="stylesheet" href="css/ui-color.css">
+        <link rel="stylesheet" href="css/ui-res.css">
+        <link rel="stylesheet" href="css/ui-365.css">
+        <link rel="stylesheet" href="css/ui-single.css">
+        <script src="js/zepto.min.js"></script>
+        <script src="js/beihai365_comman.js"></script>
+        <script src="js/beihai365_global.js"></script>
+    </head>
+    <!-- 添加标题  -->
+    <body class="um-vp bg365" ontouchstart>
+
+        <div id="page_0" class="up ub ub-ver" tabindex="0">
+
+            <!-- 贴单标题  -->
+            <section class="single_ul ">
+
+                <h1 class=" c_grey_33 f16 fontw sing_tt">帖单标题</h1>
+                <div class="sing_title_wper ">
+                    <p class="sing_t js-single-hint">
+                        给帖单取个好名字吧，30字以内哦
+                    </p>
+                    <input class="addtitle js-edit-wap" type="text"  />
+                </div>
+            </section>
+        </div>
+        <script>
+            var uid = localStorage.uid;
+
+            //新建帖单
+            var username = localStorage.username;
+            var tid = localStorage.tid;
+            //帖子的tid
+
+            var ifedit = localStorage.ifedit;
+            //是否处于修改状态
+
+            //已知贴单cid处理修改状态
+            var cid = localStorage.singleCid;
+            var titlename = localStorage.titleName;
+
+            var nn = '';
+
+            var ifoneclick = true;
+
+            window.uexOnload = function(type) {
+                if (!type) {
+                    init();
+                }
+            }
+            function init() {
+
+                if (ifedit == 'edit') {
+                    //修改标题
+                    $('.js-edit-wap').val(titlename);
+                    $('.js-single-hint').addClass('hide');
+                }
+
+                $('.js-edit-wap,.js-single-hint').click(function() {
+                    $('.js-single-hint').addClass('hide');
+                    $('.js-edit-wap').focus();
+                })
+            }
+
+            function _submit() {
+
+                if (!ifoneclick) {
+                    uexWindow.toast("0", "5", '正在提交哦，不要再点了', "1000");
+                    return;
+                }
+
+                var text = $('.js-edit-wap').val();
+                if (text.length <= 0 || /^\s+$/.test(text)) {
+                    $('.js-single-hint').removeClass('hide').addClass('error').text('还没有取名字呢！');
+                    return;
+                } else if (text.length > 30) {
+                    $('.js-single-hint').removeClass('hide').addClass('error_top').text('只能填写30个字哦！');
+                    return;
+                }
+
+                var url,
+                    succText;
+
+                if (ifedit == 'edit') {
+                    //修改标题
+                    url = '/index.php?c=threadslist&do=update_collectionname&cid=' + cid;
+                    succText = "修改成功";
+                    localStorage.singleCid = cid;
+                    localStorage.uid = uid;
+                } else {
+                    //添加贴单
+                    url = '/index.php?c=threadslist&do=create_collection';
+                    succText = "填写成功";
+                    localStorage.uid = uid;
+                    localStorage.tid = tid;
+                    localStorage.ifCreatorInv = 'true';
+                }
+
+                ifoneclick = false;
+
+                url = reLink(url);
+
+                AJAX.post(url, {
+                    'username' : username,
+                    'name' : text
+                }, function(data) {
+                    var data = JSON.parse(data);
+                    console.log('data');
+
+                    if (data.result == 'success') {
+                        if (ifedit == 'edit') {
+                            uexWindow.toast("0", "5", succText, "1000");
+                            reload.reoperate(text)
+                            reload.rehead();
+                        } else {
+                            localStorage.singleCid = data['data'].collection_id;
+                            addList(localStorage.singleCid);
+                        }
+
+                        localStorage.isload = true;
+
+                        reload.redetail();
+                        refreshDec();
+
+                    } else {
+                        uexWindow.toast("0", "5", data.msg, "1000");
+                    }
+
+                }, function() {
+                    alert('数据获取失败');
+                })
+            }
+
+            function addList(cid) {
+
+                var joinlist = reLink('/index.php?c=threadslist&do=join_collection&category=0&cid=' + cid + '&tid=' + localStorage.tid);
+                //alert(joinlist)
+                AJAX.get(joinlist, function(data) {
+                    var data = JSON.parse(data);
+                    if (data.result == 'success') {
+                        if (!localStorage.ifchange) {
+                            
+                            reload.opendec()
+
+                        } else {
+                            //无预览状态进来的贴单
+                            uexWindow.toast("0", "5", '添加成功', "2000");
+                            setTimeout(function() {
+                                reload.rehead();
+                            }, 1500)
+                        }
+
+                        localStorage.nofristCtreate = true;
+
+                    } else {
+                        uexWindow.toast("0", "5", data.msg, "1000");
+                    }
+
+                }, function() {
+                    alert('拉不到数据');
+                })
+            }
+
+            function closeSelf() {
+                //alert("这里关闭？333")
+                uexWindow.close('-1');
+            }
+           
+            function refreshDec() {
+                //alert("来不来这里33")
+                var reName = ("single-dec" + localStorage.tiedanDecWindowId);
+                uexWindow.evaluateScript(reName, 0, "onloadHtml.createHtml()");
+            }
+            //窗口ID
+            var $winName = ("single-title");
+            reload = {
+                rehead : function() {
+                    //alert("关闭333")
+                    //关闭页面
+                    uexWindow.evaluateScript($winName, 0, "closeSelf()");
+                },
+                reoperate : function(text) {
+                    uexWindow.evaluateScript('single-decOperate', 0, "editQiao('" + text + "')");
+                },
+                redetail : function() {
+                    //刷新帖子页面
+                    var reName = ("detail" + localStorage.detailWindowId);
+                    console.log('刷新帖子页面' + reName);
+                    uexWindow.evaluatePopoverScript(reName, "detail_content", "oRead.loadData(0, true , 1)");
+                },
+                opendec : function() {
+                    //reload.rehead();
+                    //var tiedanDecWindowId = 'single-dec' + localStorage.tiedanDecWindowId;
+                    //uexWindow.evaluateScript($winName, 0, "linkUrl('stick_single_dec.html')");
+                    
+                    var reName = ("detail" + localStorage.detailWindowId);
+                    uexWindow.evaluateScript(reName, 0, "tiedanCallback()");
+                    //console.log('刷新帖子页面' + reName);
+                    //uexWindow.evaluatePopoverScript(reName, "detail_content", "oRead.loadData(0, true , 1)");
+                    /*
+                    var tiedanDecWindowId = 'single-dec' + localStorage.tiedanDecWindowId;
+                    uexWindow.open(tiedanDecWindowId, '0', 'stick_single_dec.html', '12', '', '', '4');
+                   
+                     setTimeout(function(){
+                         
+                     },500);  
+                      */
+                }
+            }
+
+        </script>
+
+    </body>
+</html>

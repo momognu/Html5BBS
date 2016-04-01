@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title></title>
+<meta charset="utf-8">
+<meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+<link rel="stylesheet" href="css/ui-base.css">
+<link rel="stylesheet" href="css/ui-box.css">
+<link rel="stylesheet" href="css/ui-color.css">
+<link rel="stylesheet" href="css/ui-res.css">
+<link rel="stylesheet" href="css/ui-365.css">
+<script src="js/zy_control.js"></script>
+<script src="js/zy_tmpl.js"></script>
+<script src="js/beihai365_comman.js"></script>
+<script src="js/zy_click.js"></script>
+<script src="js/beihai365_global.js"></script>
+</head>
+<body class="um-vp c-wh" ontouchstart>
+<div id="content" class="ub-f1 tx-l t-bla ub-img6"> </div>
+<!--content结束-->
+
+</body>
+<script src="js/zepto.min.js"></script>
+<script>
+                             var $winName = ("list" + localStorage.listWindowId);
+    zy_init();
+            
+    var objArr = new Object();
+    window.uexOnload=function(type)
+    
+    {   
+        localStorage.listOrder = 1;
+        //板块id
+        var fid = localStorage.fid;
+        //向上滑动加载
+        Thread.touch_load(fid);
+        //打开加载
+        Thread.onload_threads(fid);
+        
+        //监听侧滑
+        uexWindow.onSwipeRight = function() {
+            //uexWindow.evaluateScript($winName, 0, "closeWin();");
+        }
+        //启用统计
+        isMTA("list");
+    }
+    
+    //最新回复和发布切换
+    function get_order(order){
+        var fid = localStorage.fid;
+        Thread.record = 0;
+        objArr = null;
+        objArr = new Object();
+        if(order == 0){
+            localStorage.iftopped="no";
+            localStorage.listOrder = 0;
+            Thread.flush_threads(fid);
+        }else if(order == 1){ //按照最新回复来排序
+            localStorage.iftopped="no";
+            localStorage.listOrder = 1;
+            Thread.flush_threads(fid);
+        }else if(order == 2){ //置顶帖子
+            localStorage.iftopped="yes";
+            Thread.flush_threads(fid);
+        }
+    }
+    
+    //帖子类
+    var Thread = {
+        record : 0, //分页记录
+        thread_list_url :  reLink("/index.php?jsoncallback=?&c=threads&m=list"), 
+        __load_treads : function(forums_id,success_call,fail_call){
+                var _this = this;
+                var iftopped  = localStorage.iftopped; //默认排序
+                var order  = localStorage.listOrder; //默认排序
+                console.log("地址是："+Thread.thread_list_url + "&record=" +Thread.record + "&order=" + order + "&fid=" + forums_id + "&iftopped=" + iftopped + "&type=" + getLocalStorge('sec_url'))
+                $.getJSON(Thread.thread_list_url + "&record=" + Thread.record + "&order=" + order + "&fid=" + forums_id + "&iftopped=" + iftopped + "&type=" + getLocalStorge('sec_url'),function(data){
+                        console.log(data);
+                        //记录版块是否被收藏
+                        localStorage.is_collect_fid = data.is_collect_fid;
+
+                        //标记版块是否被用户收藏
+                        uexWindow.evaluateScript($winName,"0","sFid.is_collect_fid()");
+                        //设置是否显示发帖按钮
+                        uexWindow.evaluateScript($winName,"0","postshow("+data.postsign+")");
+                        
+                        //设置标题
+                        uexWindow.evaluateScript($winName,"0","setListTitle('"+data.fid_name.name+"')");
+                        var keyth = ""
+                        //循环显示列表
+                        var thread_tpl_data = "";
+                        for(var i=0; i<data.thread.length;i++){
+                            var re = data.thread[i];
+                            
+                            if(!objArr[re.tid]){                     
+                                objArr[re.tid] = true;                               
+                                thread_tpl_data += '<div class="read_list ut ub">'+
+                                                    '<div class="ub-f1 ub ub-ver"  ontouchstart="zy_touch(\'click_opacity\')" onclick="openWindow.select(\'3\',\''+re.tid+'\')">'+
+                                                        '<div class="subject">'+_this.reTopped(re.topped)+_this.reDigest(re.digest)+_this.reIfupload(re.ifupload)+re.subject+_this.reIs_new(re.is_new)+'</div>'+
+                                                        '<div class="author_list">'+
+                                                            '<div class="ufl">'+re.author+'<span class="ll">'+re.postdate+'</span><span class="ll">'+re.hits+_this.reReplies(re.replies)+'</span><span class="ll">'+re.lastposter+'</span></div>'+
+                                                        '</div>'+
+                                                    '</div>'+
+                                                    //'<div class="page_total tx-c" ontouchstart="zy_touch(\'click_opacity\')"><div class="page_total_icon"></div></div>' +
+                                                  _this.reSign(re.sign)+'</div>';
+                            }
+                        }
+                       
+                        if(data.thread == "fail") thread_tpl_data = '<div class="ub ub-ac ub-pc" style="height:10rem">没有帖子</div>'; //如果没有记录
+                        if(thread_tpl_data == "") thread_tpl_data = ""; //如果没有记录
+
+                        if(data.thread == "lastpage") {
+                            success_call('');
+                        }else{
+                            success_call(thread_tpl_data);
+                        }                   
+                })
+        },
+        
+
+        //滑动加载
+        touch_load : function(forums_id){
+
+            
+                uexWindow.setBounce(1);
+        uexWindow.notifyBounceEvent(0,1);
+        uexWindow.notifyBounceEvent(1,1);
+        //var json='{"textColor":"#333","imagePath":"","levelText":"刚刚","pullToReloadText":"继续拖动更新","releaseToReloadText":"松手更新","loadingText":"更新中..."}';
+        //uexWindow.setBounceParams(0, json);
+        uexWindow.showBounceView("0","#FFFFFF", 1);
+        //var json2 ='{"textColor":"#333","imagePath":"","levelText":"","pullToReloadText":"继续上拉加载","releaseToReloadText":"松手加载下一页","loadingText":"加载中..."}';
+        //uexWindow.setBounceParams(1, json2);
+        uexWindow.showBounceView("1","#FFFFFF", 1);
+
+    　　　　    uexWindow.onBounceStateChange=function(t,s){
+    　　　　    if(t=="1"){
+    　　　　　   if(s=="2"){
+                        Thread.record += 50; //分页
+    　　　　　　          Thread.__load_treads(forums_id,function(thread_tpl_data){
+                            var d=document.createElement("DIV");
+    　　                      d.innerHTML = thread_tpl_data;
+                            $id("content").appendChild(d);
+                            uexWindow.resetBounceView(t);
+                        });
+    　　　　　　　　    }
+    　　　　　　  }
+                if(t == "0"){
+                    if(s=="2"){
+                        objArr = null;
+                        objArr = new Object();
+                        Thread.record = 0;
+    　　　　　　          Thread.__load_treads(forums_id,function(thread_tpl_data){
+                            $id("content").innerHTML = "<div>" + thread_tpl_data + "</div>";
+                            uexWindow.resetBounceView(t);
+                        });
+    　　　　　　　　    }
+                }
+    　　　　    }
+        },
+        
+        //加载某板块的帖子列表
+        onload_threads : function(forums_id){
+            lodding.show();
+            this.__load_treads(forums_id,function(thread_tpl_data){
+                            var d=document.createElement("DIV");
+                    　　               d.innerHTML = thread_tpl_data;
+                            $id("content").appendChild(d);
+                            lodding.hide();
+                        });
+        },
+        //刷新帖子列表
+        flush_threads : function(forums_id){
+            lodding.show();
+            Util.moveTop();
+            this.__load_treads(forums_id,function(thread_tpl_data){
+                            $id("content").innerHTML = "<div>"+thread_tpl_data+"</div>";
+                            lodding.hide();
+                        });
+        },
+        
+        reTopped : function(s){
+            if(s != 0){
+                return '<span class="list_pic ding">顶</span>';
+            }
+                return '';
+            
+        },
+        reDigest : function(s){
+             if(s!= 0){
+                return '<span class="list_pic jing">精</span>';
+            }
+                return '';
+            
+        },
+        reIfupload : function(s){
+            if(s != 0){
+                                        return '<span class="list_pic">图</span>';
+                                    }
+                                        return '';
+                                    
+        },
+        reIs_new : function(s){
+            if(s == 1){
+                                        return '<span class="new"></span>';
+                                    }
+                                        return '';
+                                    
+        },
+        reSign : function(s){
+            if(s){
+                return "<div class=\"hrbiao\"><span>"+s+"</span></div>";                    
+            }          
+            return '';
+        },
+        reReplies : function(s){
+            if(s != 0){
+                return '/' + s;
+            }
+            return ' ';
+            
+        }
+        
+    }
+    </script>
+</html>

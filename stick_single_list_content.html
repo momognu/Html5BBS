@@ -1,0 +1,175 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1.0, user-scalable=no" />
+        <link rel="stylesheet" href="css/ui-tab.css">
+        <link rel="stylesheet" href="css/ui-base.css">
+        <link rel="stylesheet" href="css/ui-box.css">
+        <link rel="stylesheet" href="css/ui-color.css">
+        <link rel="stylesheet" href="css/ui-res.css">
+        <link rel="stylesheet" href="css/ui-365.css">
+        <link rel="stylesheet" href="css/ui-single.css">
+        <script src="js/zepto.min.js"></script>
+        <script src="js/beihai365_comman.js"></script>
+        <script src="js/beihai365_global.js"></script>
+    </head>
+    <body class="um-vp bg365" ontouchstart>
+
+        <div id="page_0" class="up ub ub-ver" tabindex="0">
+            <!-- 无贴单列表显示  -->
+            <div class="tac bg_white fp_section hide" id="no-single">
+                <div class="fp_section hide" id="no-creat">
+                    <p class="single_text">
+                        你还没有创建帖单，点“贴单”将帖子收藏到这吧！
+                    </p>
+                    <div class="single_no_img"><img src="css/img/seach/no_single.png" />
+                    </div>
+                </div>
+                <div class="fp_section hide" id="no-fouse">
+                    <p class="single_text">
+                        你还没关注过帖单，点“+关注帖单”会出现这里哦！
+                    </p>
+                    <div class="single_no_img"><img src="css/img/seach/no_single_1.png" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- 贴单列表  -->
+            <div class="single_ul js-single-list">
+                <ul id="create-content" onclick="stopPP(event);">
+                    <div class="loading">
+                        <img src="css/img/loadding.png" class="loadimg" />
+                        <p class="c_grey_66 f14">
+                            正在加载中
+                        </p>
+                    </div>
+                </ul>
+            </div>
+        </div>
+        <script>
+            var ifcreate = localStorage.ifcreate || 'create';
+            var uid = localStorage.uid;
+            var tid = localStorage.tid;
+
+            onloadHtml = {
+                url : '',
+                ifcreateobj : {
+                    'create' : $('#no-creat'),
+                    'focus' : $('#no-fouse')
+                },
+                antecedents : function() {
+                    var _this = this;
+                    if (ifcreate == 'create') {
+                        //创建的贴单
+                        _this.url = '/index.php?c=threadslist&do=collections_from_owner';
+                        var titletext = '我创建的帖单';
+                    } else if (ifcreate == 'focus') {
+                        //关注的贴单
+                        _this.url = '/index.php?c=threadslist&do=my_favorite_collections';
+                        var titletext = '我关注的帖单';
+                    } else {
+
+                        //从帖子进来的贴单列表
+                        _this.url = '/index.php?c=threadslist&do=lists_has_the_posts&category=0&tid=' + tid;
+                        var titletext = '收集了该帖的帖单';
+                    }
+                    //头
+                    $('.js-head-title').text(titletext);
+                    return _this.url;
+                },
+                createHtml : function() {
+                    var _this = this;
+
+                    var url = reLink(_this.antecedents());
+                    console.log(url);
+
+                    if (!url) {
+                        return
+                    };
+
+                    AJAX.get(url, function(data) {
+                        var data = JSON.parse(data);
+
+                        if (data.result == 'success') {
+                            //有数据
+
+                            if (data.data <= 0) {
+                                //无数据显示新增提示
+                                $('.fp_section').css('height', $(window).height() - $('#header').height())
+                                $('#no-single').removeClass('hide');
+                                _this.ifcreateobj[ifcreate].removeClass('hide');
+                                $('.js-single-list').addClass('hide');
+                            } else {
+                                $('#no-single').addClass('hide');
+                                $('.js-single-list').removeClass('hide');
+                            }
+
+                            var list = data.data.collection_list;
+                            var html = '';
+                            for (var i = 0; i < list.length; i++) {
+                                var ondata = list[i];
+
+                                if (!ondata.collection_name) {
+                                    continue;
+                                }
+
+                                var username = '',
+                                    updatanum = '';
+
+                                if (ifcreate != 'create') {
+                                    username = ondata.username ? '<span">' + ondata.username + '/</span>' : '';
+                                    //创建者(只在关注的贴单里出现)
+                                    updatanum = ondata.newjoin ? '<span class="sing_num">' + ondata.newjoin + '</span>' : '';
+                                    //时限内更新数目
+                                }
+
+                                var tsubject = ondata.tsubject ? '<h2 class="f14 space fontw">' + ondata.tsubject + '</h2>' : '';
+                                //标题
+                                var follow_num = (!ondata.follow_num || ondata.follow_num == '0') ? '' : ondata.follow_num + '人关注';
+                                //多少人关注
+
+                                html += '<li class="ub" onclick="openMySingleDec(' + ondata.collection_id + ')" >' + '<div class="liicon mt95"></div>' + '<div class="ub-f1 listr">' + '<h1 class="c_grey_33 f16 ub ub-f1"><text class="space ub-f1" style="display: block;">' + ondata.collection_name + '</text>' + updatanum + '</h1>' + tsubject + '<p class="tar f13 fontw">' + username + follow_num + '</p>' + '</div>' + '</li>';
+                            }
+                            $('#create-content').html(html);
+
+                        } else {
+                            uexWindow.toast("0", "5", data.msg, "0");
+                        }
+                    }, function() {
+                        alert('数据获取失败');
+                    })
+                }
+            }
+
+            window.uexOnload = function(type) {
+                if (!type) {
+                    if (uexWidgetOne.iOS7Style) {
+
+                        $("#header").css({
+                            "padding-top" : "1.25rem"
+                        });
+                        $(".header_single").css({
+                            "padding-top" : "1.25rem"
+                        });
+                    }
+
+                    var $winName = ("single-list" + localStorage.tiedanWindowId);
+
+                    //监听侧滑
+                    uexWindow.onSwipeRight = function() {
+                        //uexWindow.evaluateScript($winName, 0, "closeWin();");
+                    }
+
+                    onloadHtml.createHtml();
+                }
+            }
+            function openMySingleDec(cid) {
+                openWindow.select('7', cid);
+
+            }
+        </script>
+
+    </body>
+</html>

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" href="css/ui-input.css">
+        <link rel="stylesheet" href="css/ui-base.css">
+        <link rel="stylesheet" href="css/ui-box.css">
+        <link rel="stylesheet" href="css/ui-color.css">
+        <link rel="stylesheet" href="css/ui-365.css">
+        <script src="js/zy_control.js"></script>
+        <script src="js/zy_click.js"></script>
+        <script src="js/beihai365_comman.js"></script>
+        <script src="js/beihai365_global.js"></script>
+        <script src="js/zepto.min.js"></script>
+        <script src="js/jquery.mobile.custom.min.js">
+        </script>
+        <script src="js/laytpl.js"></script>
+        <script type="text/javascript" src="js/iscroll-probe.js"></script>
+    </head>
+
+  <body class="um-vp c-wh" ontouchstart>
+        <div id="page_0" class="up ub ub-ver" tabindex="0">
+            
+        <div id="header" >
+            <div class="uh c-m15 t-wh ub head_top_home">
+                <div class="list_back"  onclick="closeWin();"></div>
+                <h1 id="form_name" class="ub-f1 ulev5 ut-s tx-c" tabindex="0">论坛</h1>
+                <div class="list_re" style="background:none;"></div>
+            </div>
+        </div>
+        
+        
+        <div class="js-header">
+            <div id="formsList_left" style="display: none">
+                <div id="scroller_left">
+                    
+                    <div id="leftHTML"></div>
+                </div>
+            </div>
+    
+            <div id="formsList" class="scroller" style="display: none">
+                
+            </div>
+       </div> 
+        
+      </div>  
+    </body>
+
+    <script>
+        zy_init();
+        window.uexOnload = function(type) {
+            
+            if (uexWidgetOne.iOS7Style) {
+                $("#header").prepend('<div class="iPhoneBar"></div>');
+            }
+            
+            if (!type) {
+                localStorage.returnType = "forms_list";
+                
+                var h = $(window).height();
+                var hele = $('#header').height();
+                $('.js-header').height( h - hele )
+                
+                lodding.show();
+                getData();
+            }
+        }
+        
+        //滚动
+        var myScroll;
+        var myScroll_left;
+
+        
+        //获取数据
+        function getData() {
+            console.log(reLink('/index.php?c=threads&m=threadsentry'));
+            AJAX.get(reLink('/index.php?c=threads&m=threadsentry'), function(res) {
+                localStorage.setItem("reThreadsData", res);
+                loadNode();
+                lodding.hide();
+            }, function() {
+                alert('数据获取失败');
+            });
+        }
+        
+        //存放内容
+        var htmlwar = {},
+            fristone = '';
+        function loadNode(){
+            $("#formsList_left").show();
+            $("#formsList").show();
+            //转换JSON
+            var reData = (JSON.parse(localStorage.getItem("reThreadsData")));
+
+            //渲染左侧模板
+            var lefttpl = "<ul>";
+            for (var i=0; i < reData.channel.length; i++) {
+                var re = reData.channel[i];
+                lefttpl+='<li id="big_'+re.id+'"><a href="javascript:goRightid(\''+re.id+'\')">'+re.tname+'</a></li>';
+            };
+            lefttpl+='</ul>';
+            
+            document.getElementById('leftHTML').innerHTML = lefttpl;
+            
+            
+            //右侧
+            var isthreadflag = '';
+            for (var i=0; i < reData.forums.length; i++) {
+                var rekey = reData.forums[i];
+                
+                if(i == 0){ 
+                    fristone =  rekey.id 
+                    console.log(fristone)
+                };
+                var righttpl = '<div id="is_'+rekey.id+'"><ul>';           
+                for (var k=0; k < rekey.forums.length; k++) {
+                    var re = rekey.forums[k];
+                    if( re.addthreadflag == '1'){
+                        isthreadflag = '';
+                    }else{
+                        isthreadflag = 'i_add';
+                    }
+                    righttpl+='<li>'+
+                                    '<a><div class="scroller-li ub">'+
+                                        '<strong class="ub-f1" onclick="javascript:openSelect(2,'+re.url+')">'+re.name+'</strong>'+
+                                        '<p class="bbs_i '+ isthreadflag +'" ontouchstart="operate(this)" data-fid="'+re.url+'"><span></span></p>' +
+                                    '</div></a>'+
+                                '</li>'
+               
+                }
+                righttpl+='</ul></div>';
+                htmlwar[rekey.id] = righttpl;
+            };
+
+            document.getElementById('formsList').innerHTML = htmlwar[fristone];
+            loaded();
+        }
+        
+        function loaded() {
+            myScroll = new IScroll('#formsList', {
+                mouseWheel : true,
+                momentum : false,
+                bounce : false,
+                click : true
+
+            });
+            myScroll_left = new IScroll('#formsList_left', {
+                mouseWheel : true,
+                bounce : false,
+                momentum : false,
+                click : true
+            });
+      
+            var arrHeight = new Array(),arrID = new Array();
+            
+            //第一个样式
+            $('#leftHTML li:nth-child(1)').addClass("selected");
+
+        }
+
+        //单击事件
+        var aaa = 0;
+        function openSelect(a,b){
+            aaa++
+            if(aaa == 1){
+                openWindow.select(a,b);
+                setTimeout(function(){
+                    aaa = 0;    
+                },500); 
+            }
+            
+        }
+        
+        //左侧选择事件
+        function goRightid(id){
+            fristone = id;
+            $('#formsList').html(htmlwar[id]);
+            myScroll = new IScroll('#formsList', {
+                mouseWheel : true,
+                momentum : false,
+                bounce : false,
+                click : true
+
+            });
+            
+            $("#leftHTML li").removeClass("selected");
+            $('#big_'+id).addClass("selected");
+        }
+
+        function closeWin() {
+            uexWindow.close('-1');
+        }
+        
+        
+         var loadThing = {
+            rlink: function(url){
+                return 'http://beihai365.com/phoneapi/'+ url + '&uid='+ getLocalStorge('uid') +'&save_code='+getLocalStorge('save_code');
+            },     
+            //添加和删除模块
+            addThead : function (id, callback){
+                    var _that = this;
+    
+                    if( getLocalStorge('uid') ){
+                        var url = _that.rlink('index.php?c=operate&m=thread&ac=addthreaduser&fid='+ id );
+                        AJAX.get( url, function(res) {
+                            var res = JSON.parse(res);
+                            console.log(res);
+                            if( res.result == 'success' ){
+                                uexWindow.toast("0", "5", '添加成功', "1000");
+                                callback();
+                                _that.reload();
+                            }else{
+                                uexWindow.toast("0", "5", res.msg, "1000");
+                            }
+                        }, function() {
+                            alert('数据获取失败');
+                        });          
+                    }else{
+                        localStorage.loginType = 'forms_list';
+                        newOpenWin('login', 'login.html');
+                    }
+                },
+                minusThead: function(id, callback){
+                    var _that = this;
+                    if( getLocalStorge('uid') ){
+                        var url = _that.rlink('index.php?c=operate&m=thread&ac=delthreaduser&fid='+ id );
+                        AJAX.get( url, function(res) {
+                            var res = JSON.parse(res);
+                            
+                            if( res.result == 'success' ){
+                                uexWindow.toast("0", "5", '删除成功', "1000");
+                                callback();
+                                _that.reload();
+                            }else{
+                                uexWindow.toast("0", "5", res.msg, "1000");
+                            }
+                        }, function() {
+                            alert('数据获取失败');
+                        });          
+                    }else{
+                        localStorage.loginType = 'forms_list';
+                        newOpenWin('login', 'login.html');
+                    }                
+                },
+                reload:function(){
+                    uexWindow.evaluateScript("root", 0, "login('bbs_list');");
+                }
+           } 
+       
+       var iffrist = true;
+            function operate(t){
+                var that = $(t);
+                //alert('iffrist'+iffrist);
+                if( iffrist ){
+                    iffrist = false;
+                    var fid = that.attr('data-fid');
+                    
+                    if( that.hasClass('i_add') ){
+                         loadThing.addThead(fid, function(){
+                            that.removeClass('i_add');
+                            htmlwar[fristone] = $('#formsList').html();
+                            //alert('t');
+                            iffrist = true;
+                        });
+                    }else{
+                        loadThing.minusThead(fid, function(){
+                           // alert('f');
+                            that.addClass('i_add')
+                            htmlwar[fristone] = $('#formsList').html();
+                            iffrist = true;
+                        });
+                    }                    
+                }
+
+            }
+       
+       
+           //登录的回调，全在loginjs里调用
+           function loginCallback(){
+                uexWindow.evaluateScript("login", 0, "colse();");
+                getData();
+                loadThing.reload();
+                iffrist = true;
+            }
+    </script>
+
+</html>

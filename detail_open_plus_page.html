@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" href="css/ui-tab.css">
+        <link rel="stylesheet" href="css/ui-base.css">
+        <link rel="stylesheet" href="css/ui-box.css">
+        <link rel="stylesheet" href="css/ui-color.css">
+        <link rel="stylesheet" href="css/ui-res.css">
+        <link rel="stylesheet" href="css/ui-365.css">
+        <link rel="stylesheet" href="css/ui-single.css">
+        <script src="js/beihai365_comman.js"></script>
+        <script src="js/beihai365_global.js"></script>
+
+        <script src="js/zepto.min.js"></script>
+        <style>
+        </style>
+    </head>
+    <body class="fp-section">
+        <div id="page_0" class="up ub ub-ver" tabindex="0">
+            <div class="pagePlus">
+                <ul class="page_ul js-page">
+                    <li>
+                        <p data-page="1">
+                            1
+                        </p>
+                    </li>
+                </ul>
+
+            </div>
+
+            <!--footer结束-->
+        </div>
+    </body>
+
+    <script>
+        //记录来路
+       
+
+        var $pageul = $('.js-page');
+
+        window.uexOnload = function() {
+            intfun();
+        }
+        
+        function intfun() {
+                var pagelent = localStorage.allPage;
+                var pagehtml = '';
+                
+                for( var ii = 1; ii <= pagelent; ii++ ){
+                    pagehtml += '<li class="'+rePage(ii)+'" onclick="pageClick(\''+ ii +'\')"><p data-page="'+ ii +'" >'+ ii +'</p></li>' ;
+                }
+                $pageul.html(pagehtml);
+            
+
+        }
+        function rePage(s){
+            if(s == localStorage._page){
+                return 'ispage';
+            }
+            return '';
+        }
+        function pageClick(p){
+            var reName = ("detail"+localStorage.detailWindowId);
+            uexWindow.evaluateScript(reName,0,"_setPageData('"+p+"');");
+            
+        }
+
+    </script>
+
+</html>

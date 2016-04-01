@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>
+    </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" href="css/ui-base.css">
+        <link rel="stylesheet" href="css/ui-box.css">
+        <link rel="stylesheet" href="css/ui-color.css">
+		<link rel="stylesheet" href="css/ui-res.css">
+		<link rel="stylesheet" href="css/ui-365.css">
+        <script src="js/zy_control.js">
+        </script>
+		<script src="js/zy_tmpl.js">
+		</script>
+		<script src="js/beihai365_comman.js">
+		</script>
+		<script src="js/zy_click.js"></script>
+		<script src="js/beihai365_global.js"></script>
+    </head>
+	    <body class="um-vp c-wh" ontouchstart>
+        <div id="page_0" class="up ub ub-ver" tabindex="0">
+            <!--header结束-->
+			<!--content开始-->
+            <div id="content" class="ub-f1 tx-l t-bla ub-img6">
+                
+            </div>
+            <!--content结束-->	
+        </div>
+    </body>
+	<script src="js/zepto.min.js"></script>
+    <script>
+	zy_init();
+	window.uexOnload=function(type)
+	{	
+		 if (!type) {
+		 	//用户id
+				var uid = localStorage['uid'];
+				var meURL = localStorage.meURL;
+				/*if(meURL == 's_collect_fid'){
+					
+					Thread.onload_threads(uid);
+				}else if(meURL == 's_isread_fid'){
+					Thread.onload_threads(uid);
+				}else{*/
+				Thread.touch_load(uid);
+				Thread.onload_threads(uid);
+				/*}*/				
+			}
+			
+          
+     
+	}
+	function openlist(name,fid,form_name){
+	    /*
+		LS.posts({
+			'fid' : fid,
+			'form_name' : form_name
+		});
+		newOpenWin('listwin',name+'.html');
+		*/
+		alert("未知错误，请到论坛发帖描述您遇到的情况")
+	}
+	function del_s_collect(t){
+		$(t).addClass("edit_collect_btn_del");
+		$(t).parent().animate({opacity: 0.25}, 500, 'ease-out');
+		setTimeout(function () {
+			var fid = $(t).parent().attr('fid');
+			$(t).parent().remove();
+			del_s_collect_data(fid);
+		}, 500);
+	}
+	function del_s_collect_data(f){
+		var collect_url = beihai365_url+"/index.php?jsoncallback=?&version="+version+"&c=threads" + "&deviceid=" + localStorage.macAddress;
+		var fid = f;
+		$.getJSON(collect_url + '&m=delete_collect_fid' + '&uid=' + localStorage.uid + '&fid=' + fid, function(data){
+			if (data.result == 'success') {
+				localStorage.mycollect_boolean = '0'
+				uexWindow.toast("0", "5", "已删除成功", "3000");
+			}
+			else {
+				uexWindow.toast("0", "5", "操作失败，请重试！", "3000");
+			}
+		});
+	}
+						
+	function btn_admin_forms(){
+		newOpenWin('me','me_content_head.html');
+		localStorage.meURL = "s_collect_fid_edit";
+	}
+	
+
+	//帖子类
+	var Thread = {
+		record : 0, //分页记录
+		recordRead:0,
+		newbro : [],
+		thread_list_url :  reLink("/index.php?jsoncallback=?&version="+version+"&c=threads"+"&record="), 
+		browseRead : function(meURL, broweID, browPage, upper){//处理浏览帖子
+		    var _that = this;
+		    //我浏览的帖子
+            if( localStorage["meURL"] == meURL && broweID ){
+                var browsenum = broweID.split(',');
+                var broarray = [];
+                var issave = [];
+                //分页
+                var browpagenum = browPage;
+                //上限
+                var upper = upper;
+                //数组去重
+                for(var k = browsenum.length-1; k >= 0 ; k--){
+                   if( !issave[ browsenum[k] ] ){
+                       issave[ browsenum[k] ] = true;
+                       broarray.push( browsenum[k] );
+                   }
+                }
+                if( upper ){
+                    //超过一百就把之前的去掉
+                    broarray =  broarray.length > upper ? broarray.slice(0,upper) : broarray;
+                }
+                //进行分页
+                var pagen = ~~(broarray.length / browpagenum);
+                for( var j = 0 ; j < pagen; j++ ){
+                    _that.newbro.push( broarray.slice( j * browpagenum, (j+1) * browpagenum ) ) 
+                }
+                if( broarray.length % browpagenum != 0){
+                    _that.newbro.push( broarray.slice( pagen * browpagenum ) )          
+                }           
+    
+            }
+		},
+		__load_treads : function(uid,success_call,fail_call){	
+
+			var _this = this;
+            var tpl_key = localStorage["meURL"];
+            var newurl = this.thread_list_url + this.record + "&m="+ (localStorage.meURL == 's_collect_fid_edit'?"s_collect_fid":localStorage.meURL)
+
+
+            if(_this.newbro.length > 0 ){
+                 if( _this.recordRead > _this.newbro.length -1 ){
+                     uexWindow.hiddenBounceView(1);
+                     uexWindow.resetBounceView(1);
+                     return;
+                 }
+                 var newtids = _this.newbro[_this.recordRead].join(',');                
+            }
+            
+			//我浏览的帖子
+			if( tpl_key == 's_isread' && localStorage.browseTid ){
+                //应该只是浏览过的帖子
+                newurl = 'http://www.beihai365.com/phone/index.php?c=threads&m=readrecord&tids='+ newtids;
+			}
+			
+			if( tpl_key == 's_isread_fid'  ){
+			    newtids = newtids ? newtids : '';
+                //应该只是浏览过的版
+                newurl = 'http://www.beihai365.com/phone/index.php?c=threads&m=getfidsinfo&fids='+ newtids;
+			}			
+
+			//我的收藏版本缓存
+			if(localStorage.mycollect && localStorage.mycollect_boolean == '1' && localStorage.meURL == "s_collect_fid"){
+				success_call(localStorage.mycollect);
+				uexWindow.setBounce("0");
+			}else{
+				$.getJSON(newurl ,function(cbdata){
+	                    console.log(cbdata)
+						var data = cbdata.me;
+
+
+						//循环显示列表
+                        var thread_tpl_data = "";
+                       
+						//如果没有记录
+						if(cbdata.result == "fail") 
+						{
+							thread_tpl_data = '<div class="my_fail">'
+							switch(localStorage["meURL"])
+							{
+							case 'me':
+							 	thread_tpl_data += '亲，您还没有发过帖子哦~快去发个帖子和大家一起分享您的故事吧~~';
+							  break;
+							case 's_collect':
+							 	thread_tpl_data += '您还没有收藏帖子哦！<br>收藏您还没有看完的帖子，稍后可以接着看哦~';
+							  break;
+							case 's_collect_fid':
+							  	thread_tpl_data += '亲，您还没有收藏过版块哦~<br>点击您常泡的版块下方导航中的“收藏”（就是那个五角星），就可以把它收藏到这里来了。这样您进版就更方便了！'
+							  break;  
+							case 's_collect_fid_edit':
+							  	thread_tpl_data += '亲，您还没有收藏过版块哦~<br>点击您常泡的版块下方导航中的“收藏”（就是那个五角星），就可以把它收藏到这里来了。这样您进版就更方便了！'
+							  break; 
+							case 's_isread_fid':
+							 	thread_tpl_data +=  uid?'您还没有浏览版块哦，快去把你常泡的、喜欢的版块看看先吧！':'<div style="text-align:center; padding:3em;">只要你登录了，<br>就能看到您的浏览记录了！</div><div class="regBtn" style="margin:0 3em;" ontouchstart="zy_touch(\'click_opacity\')" onclick="uexWindow.open(\'login\',\'0\',\'login.html\',\'1\',\'100%\',\'100%\',\'0\');"><span>我要登录</span></div>';
+							  break; 
+							default:
+							 	thread_tpl_data += '亲，这里显示的是你看过的帖子，先去看几个帖子吧~~';
+							}
+							thread_tpl_data += '</div>';
+						}else{
+                            if(tpl_key == "me"){
+                                for(var i=0; i<data.length;i++){
+                                    var re = data[i];
+                                    thread_tpl_data += '<div class="read_list ut ub">'+
+                                                    '<div class="ub-f1 ub ub-ver"  ontouchstart="zy_touch(\'click_opacity\')" onclick="openWindow.select(\'3\',\''+re.tid+'\')">'+
+                                                        '<div class="subject">'+_this.reTopped(re.topped)+_this.reDigest(re.digest)+_this.reIfupload(re.ifupload)+re.subject+_this.reIs_new(re.is_new)+'</div>'+
+                                                        '<div class="author_list">'+
+                                                            '<div class="ufl">'+re.author+'<span class="ll">'+re.postdate+'</span><span class="ll">'+re.hits+_this.reReplies(re.replies)+'</span><span class="ll">'+re.lastposter+'</span></div>'+
+                                                        '</div>'+
+                                                    '</div>'+
+                                                    //'<div class="page_total tx-c" ontouchstart="zy_touch(\'click_opacity\')"><div class="page_total_icon"></div></div>' +
+                                                  _this.reSign(re.sign)+'</div>';
+                                }                  
+                            }else if(tpl_key == "s_isread_fid"){
+
+                                for(var ii=0; ii<data.length;ii++){
+                                    var re = data[ii];
+                                    thread_tpl_data += '<div class="collect_for_home" fid="${fid}" ontouchstart="zy_touch(\'click_opacity\')" onclick="openWindow.select(\'2\',\''+re.fid+'\')">' +
+                                        '<span class="collect_for_home_name f16">'+re.name+'</span>' +
+                                    '</div>';
+                                }
+                            }else if(tpl_key == "s_isread"){
+                                for(var key in data){
+                                    if( data.hasOwnProperty(key) ){
+                                        var re = data[key];
+                                           thread_tpl_data += '<div class="read_list ut ub">'+
+                                            '<div class="ub-f1 ub ub-ver"  ontouchstart="zy_touch(\'click_opacity\')" onclick="openWindow.select(\'3\',\''+re.tid+'\')">'+
+                                                '<div class="subject">'+_this.reTopped(re.topped)+_this.reDigest(re.digest)+_this.reIfupload(re.ifupload)+re.subject+_this.reIs_new(re.is_new)+'</div>'+
+                                                '<div class="author_list">'+
+                                                    '<div class="ufl">'+re.author+'<span class="ll">'+re.postdate+'</span><span class="ll">'+re.hits+_this.reReplies(re.replies)+'</span><span class="ll">'+re.lastposter+'</span></div>'+
+                                                '</div>'+
+                                            '</div>'+
+                                          _this.reSign(re.sign)+'</div>'; 
+                                      }
+                                }        
+                            }
+						}
+						if(cbdata.result == "lastpage") {thread_tpl_data += ''; }
+						
+						success_call(thread_tpl_data);
+						
+						if(localStorage.meURL == "s_collect_fid"){
+							localStorage.mycollect = thread_tpl_data;
+							localStorage.mycollect_boolean = '1';
+						}
+				})	
+			}
+		},
+		open_detail : function(tmsgs_id,p,page_account,subject,hits,replies,form_name,fid){
+			LS.posts({
+				'tid' : tmsgs_id,
+				'p' : p == 0 ? 1 : p,
+				'page_account' : page_account == 0 ? 1 : page_account,
+				'subject' : decodeURIComponent(subject),
+				'hits' : hits,
+				'replies' : replies,
+				'form_name' : form_name,
+				'fid' : fid
+			});
+			
+			newOpenWin('reads',"read.html");
+		},
+		
+		//滑动加载
+		touch_load : function(uid){
+			uexWindow.setBounce("1");
+	　　　　	uexWindow.showBounceView("1","#FFF","1");
+	　　　　	uexWindow.showBounceView("0","#FFF","1");
+	　　　　	uexWindow.notifyBounceEvent("1","1");
+			uexWindow.notifyBounceEvent("0","1");
+			
+	　　　　	uexWindow.onBounceStateChange=function(t,s){
+	　　　　	if(t=="1"){
+	　　　　　	if(s=="2"){
+						Thread.record += 50; //分页
+						Thread.recordRead += 1; //分页
+
+				
+	　　　　　　			Thread.__load_treads(uid,function(thread_tpl_data){
+							var d=document.createElement("DIV");
+	　　						d.innerHTML = thread_tpl_data;
+							$id("content").appendChild(d);
+							uexWindow.resetBounceView(t);
+						});
+	　　　　　　　　	}
+	　　　　　　	}
+				if(t == "0"){
+					if(s=="2"){
+						Thread.record = 0;
+						Thread.recordRead = 0; //分页
+	　　　　　　			Thread.__load_treads(uid,function(thread_tpl_data){
+							$id("content").innerHTML = "<div>" + thread_tpl_data + "</div>";
+							uexWindow.resetBounceView(t);
+						});
+	　　　　　　　　	}
+				}
+	　　　　	}
+		},
+		
+		//加载某板块的帖子列表
+		onload_threads : function(uid){
+		    this.browseRead('s_isread', localStorage.browseTid, 30, 200);
+		    this.browseRead('s_isread_fid', localStorage.browseFid, 30);
+			uexWindow.toast(1,5,'加载中...',0);
+			this.__load_treads(uid,function(thread_tpl_data){
+			   
+							var d=document.createElement("DIV");
+					　　		d.innerHTML = thread_tpl_data;
+							//document.body.appendChild(d);
+							$id("content").appendChild(d);
+							uexWindow.closeToast();
+						});
+		},
+		//刷新帖子列表
+		flush_threads : function(uid){
+			uexWindow.toast(1,5,'加载中...',0);
+			Util.moveTop();
+			this.__load_treads(uid,function(thread_tpl_data){
+							$id("content").innerHTML = "<div>"+thread_tpl_data+"</div>";
+							uexWindow.closeToast();
+						});
+		},
+		main_data_tpl : function(p){
+		    // 已经不用，BAK
+			var _tmp = new Array();
+			_tmp['s_collect'] = _tmp['s_isread'] = '<div class="read_list ut ub">'+
+						'<div class="ub-f1 ub ub-ver"  ontouchstart="zy_touch(\'click_opacity\')" onclick="Thread.open_detail(${tid},1,${page_account},\'${cb:subject}\',${hits},${replies},\'${form_name}\',\'${fid}\');">'+
+							'<div class="subject">${cb:topped}${cb:digest}${cb:ifupload}${subject}${cb:is_new}</div>'+
+							'<div class="author_list">'+
+								'<div class="ufl">${form_name}<span class="ll">${author}</span><span class="ll">${hits}${cb:replies}</span><span class="ll">${lastposter}</span></div>'+
+							'</div>'+
+						'</div>'+
+						'<div class="page_total tx-c" ontouchstart="zy_touch(\'click_opacity\')" onclick="Thread.open_detail(${tid},${page_account},${page_account},\'${cb:subject}\',${hits},${replies},\'${form_name}\',\'${fid}\');"><div class="page_total_icon"></div></div>' +
+					  '</div>';
+			_tmp['me'] = '<div class="read_list ut ub">'+
+						'<div class="ub-f1 ub ub-ver"  ontouchstart="zy_touch(\'click_opacity\')" onclick="Thread.open_detail(${tid},1,${page_account},\'${cb:subject}\',${hits},${replies},\'${form_name}\',\'${fid}\');">'+
+							'<div class="subject">${cb:topped}${cb:digest}${cb:ifupload}${subject}${cb:is_new}</div>'+
+							'<div class="author_list">'+
+								'<div class="ufl">${form_name}<span class="ll">${postdate}</span><span class="ll">${hits}${cb:replies}</span><span class="ll">${lastposter}</span></div>'+
+							'</div>'+
+						'</div>'+
+						'<div class="page_total tx-c" ontouchstart="zy_touch(\'click_opacity\')" onclick="Thread.open_detail(${tid},${page_account},${page_account},\'${cb:subject}\',${hits},${replies},\'${form_name}\',\'${fid}\');"><div class="page_total_icon"></div></div>' +
+					  '</div>';		
+			/* _tmp['s_isread_fid'] ='<div class="bbs_for_home" ontouchstart="zy_touch(\'click_opacity\')" onclick="openlist(\'list\',\'${fid}\',\'${name}\')">' +
+				'<span class="bbs_for_home_name f22">${name}</span>' +
+			'</div>';		  
+			_tmp['s_collect_fid'] = _tmp['s_collect_fid_edit'] = '<div class="collect_for_home" fid="${fid}">' +
+				'<span class="edit_collect_btn" onclick="del_s_collect(this)">x</span>'+
+				'<span class="collect_for_home_name f16" ontouchstart="zy_touch(\'click_opacity\')" onclick="openlist(\'list\',\'${fid}\',\'${name}\')">${name}</span>' +
+			'</div>';*/
+			_tmp['s_isread_fid'] = '<div class="collect_for_home" fid="${fid}" ontouchstart="zy_touch(\'click_opacity\')" onclick="openlist(\'list\',\'${fid}\',\'${name}\')">' +
+				'<span class="collect_for_home_name f16">${name}</span>' +
+			'</div>';
+			
+			
+			_tmp['s_collect_fid'] = _tmp['s_collect_fid_edit'] =  '<div class="collect_for_home" fid="${fid}" ontouchstart="zy_touch(\'click_opacity\')" onclick="openlist(\'list\',\'${fid}\',\'${name}\')">' +
+				'<span class="edit_collect_btn">x</span>'+
+				'<span class="collect_for_home_name f16">${name}</span>' +
+			'</div>';
+			
+			return _tmp[p];
+		},
+		reTopped : function(s){
+            if(s != 0){
+                return '<span class="list_pic ding">顶</span>';
+            }
+                return '';
+            
+        },
+        reDigest : function(s){
+             if(s!= 0){
+                return '<span class="list_pic jing">精</span>';
+            }
+                return '';
+            
+        },
+        reIfupload : function(s){
+            if(s != 0){
+                                        return '<span class="list_pic">图</span>';
+                                    }
+                                        return '';
+                                    
+        },
+        reIs_new : function(s){
+            if(s == 1){
+                                        return '<span class="new"></span>';
+                                    }
+                                        return '';
+                                    
+        },
+        reSign : function(s){
+            if(s){
+                return "<div class=\"hrbiao\"><span>"+s+"</span></div>";                    
+            }          
+            return '';
+        },
+        reReplies : function(s){
+            if(s != 0){
+                return '/' + s;
+            }
+            return ' ';
+            
+        }
+	}
+    </script>
+</html>

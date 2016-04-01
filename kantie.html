@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>
+    </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" href="css/ui-base.css">
+        <link rel="stylesheet" href="css/ui-box.css">
+        <link rel="stylesheet" href="css/ui-color.css">
+        <link rel="stylesheet" href="css/ui-res.css">
+        <link rel="stylesheet" href="css/ui-365.css">
+        <script src="js/zy_control.js"></script>
+        <script src="js/beihai365_comman.js"></script>
+        <script src="js/zy_click.js"></script>
+        <script src="js/beihai365_global.js"></script>
+        <script src="js/zepto.min.js"></script>
+    </head>
+    <body class="um-vp c-wh" ontouchstart>
+            <!--content开始-->
+
+            <div id="content" class="ub-f1 tx-l t-bla ub-img6 kantie" style="display: none">
+                
+            </div>
+            <!--content结束-->
+    
+
+    <script>
+    var objArr = {};
+    var isDataColse = 1; //缓存总开关
+    window.uexOnload=function(type)
+    {   
+        
+        uexWindow.setBounce("0");
+        localStorage.returnType = "kantie"
+
+        lodding.show();
+        //板块id
+        var fid = localStorage.fid;
+        //向上滑动加载        
+        Thread.touch_load(fid);
+        Thread.onload_threads(fid);
+        if(localStorage.TimerLoad == 1 && localStorage.isloadpost == 1){
+             Thread.onload_newpost();
+        }
+    }
+    //帖子类
+    var Thread = {
+        record : 0, //分页记录
+        thread_list_lasturl : reLink("/index.php?jsoncallback=?&c=threads&m=newthreadbyfid&orderway=lastpost&mode=zongban"), 
+        thread_list_posturl : reLink("/index.php?jsoncallback=?&c=threads&m=newthreadbyfid&orderway=postdate&mode=zongban"), 
+        thread_list_url : reLink("/index.php?jsoncallback=?&c=threads&m=newthreadbyfid&orderway=lastpost&mode=zongban"), 
+        
+        __load_treads : function(forums_id,success_call,fail_call){
+            var _that = this;
+            
+            $.getJSON(_that.thread_list_url+"&record=" + _that.record,function(data){
+                //alert(_that.thread_list_url+"&record=" + _that.record);
+                Thread.onload_view(data, 0 ,success_call);
+                lodding.hide();
+            })
+        },
+        onload_newpost : function(){ 
+                $.getJSON(this.thread_list_posturl+"&refreshtime="+localStorage.NewTipsTime,function(data){
+                   // console.log(data)
+                    Thread.onload_view(data , 1);
+                    lodding.hide();
+
+                })
+        },
+        
+        onload_newlast : function(){ 
+                $.getJSON(this.thread_list_posturl+"&refreshtime="+localStorage.NewTipsTime,function(data){
+                   Thread.onload_view(data , 1);
+                   lodding.hide(); //这个是有缓存之后再拉一下数据
+                })
+        },
+        
+        onload_view : function(data , viewItem , success_call){
+                
+            $("#content").show();
+            if(data.gettime){
+                localStorage.gettime = data.gettime;
+            }else{
+                localStorage.gettime = data.refreshtime;
+            }
+            localStorage.NewTipsTime = data.refreshtime;
+            var thread_list_tpl = "";
+            for (var i=0; i < data.result.length; i++) {
+                var re = data.result[i];
+                if(!objArr[re.tid]){                     
+                    objArr[re.tid] = true;
+                    
+                  if(re.imgshowtype == 0){
+                    thread_list_tpl += Thread.showHTMLone(re);  
+                  }else if(re.imgshowtype == 2 || re.imgshowtype == 1){
+                    thread_list_tpl += Thread.showHTMLtwo(re);
+                  }else if( re.imgshowtype == 3){
+                    thread_list_tpl += Thread.showHTMLthree(re);;  
+                  }
+                }
+            };
+
+
+            if(thread_list_tpl == "") thread_list_tpl = ""; //如果没有记录
+            if(viewItem == 1){
+                //alert(thread_list_tpl)
+                $('#content').prepend(thread_list_tpl);
+            }else{
+                success_call(thread_list_tpl);
+            }
+            
+            keepView(); //保存数据
+  
+               
+        },
+        
+        //滑动加载
+        touch_load : function(forums_id){
+            uexWindow.setBounce("1");
+            uexWindow.resetBounceView("0");
+            uexWindow.resetBounceView("1");
+    　　　　    uexWindow.showBounceView("1","#FFF","1");
+    　　　　    uexWindow.showBounceView("0","#FFF","1");
+    　　　　            uexWindow.notifyBounceEvent("1","1");
+            uexWindow.notifyBounceEvent("0","1");
+    　　　　    uexWindow.onBounceStateChange=function(t,s){
+    　　　　    if(t=="1"){
+    　　　　　   if(s=="2"){
+                Thread.record += 30; //分页
+                Thread.__load_treads(forums_id,function(thread_tpl_data){
+                var d=document.createElement("DIV");
+                d.innerHTML = thread_tpl_data;
+                $id("content").appendChild(d);
+                uexWindow.resetBounceView(t);
+                        });
+    　　　　　　　　    }
+    　　　　　　  }
+                if(t == "0"){
+                    if(s=="2"){
+                         objArr = {}
+                         Thread.record = 0;
+    　　　　　　                                  Thread.__load_treads(forums_id,function(thread_tpl_data){
+                             $id("content").innerHTML = "<div>" + thread_tpl_data + "</div>";
+                             uexWindow.resetBounceView(t);
+                        });
+    　　　　　　　　    }
+                }
+    　　　　    }
+        },
+        
+        //加载某板块的帖子列表
+        onload_threads : function(forums_id){
+            //alert(localStorage.ktData)
+            
+            if(localStorage.ktData &&　localStorage.ktData != "" && isDataColse){
+               pickView(); 
+               lodding.hide();
+               Thread.onload_newlast();
+            }else{
+            
+            this.__load_treads(forums_id,function(thread_tpl_data){
+                            var d=document.createElement("DIV");
+                    　　              d.innerHTML = thread_tpl_data;
+                            //document.body.appendChild(d);
+                            $id("content").appendChild(d);
+                            keepView();
+                        });
+                
+                }
+        },
+        showHTMLone : function(data){
+            var rekey = data;
+            var reHTML = "";
+            var isNew = rekey.is_new==1?' newIcon':'',isHot = rekey.digest==1?' jingIcon':'',isJing = rekey.hot==1?' hotIcon':'';
+              reHTML+='<section class="has_action'+isNew+isHot+isJing+'">'+
+               '<a href="javascript:zy_touch(\'click_opacity\')" onclick="openWindow.select(3,'+rekey.tid+')" class="article_link clearfix"> <h3>'+rekey.subject+'</h3>'+ 
+                '<div class="item_info"> '+
+                 '<span class="src space">'+rekey.form_name+'</span> '+
+                 '<span class="cmt">'+rekey.hits+'/'+rekey.replies+'</span> '+
+                 '<span class="author">'+rekey.author+'</span> '+
+                 '<span class="time fr canhide">'+rekey.postdate+'</span> '+
+                '</div> </a> '+
+               '<!--<i class="icon_hot"></i>--> '+
+              '</section>';
+              return reHTML;
+        },
+        showHTMLtwo : function(data){
+            var rekey = data;
+            var reHTML = "";
+                        var isNew = rekey.is_new==1?' newIcon':'',isHot = rekey.digest==1?' jingIcon':'',isJing = rekey.hot==1?' hotIcon':'';
+
+              reHTML+='<section class="middle_mode has_action'+isNew+isHot+isJing+'"> '+
+               '<a href="javascript:zy_touch(\'click_opacity\')"  onclick="openWindow.select(3,'+rekey.tid+')" class="article_link clearfix" > <h3>'+rekey.subject+'</h3> '+
+                '<div class="list_img_holder"  style="background-image:url('+rekey.imgurls[0]+'?imageView/2/w/200)"> '+
+                '</div> '+
+                '<div class="item_info"> '+
+                 '<span class="src space">'+rekey.form_name+'</span> '+
+                 '<span class="cmt">'+rekey.hits+'/'+rekey.replies+'</span> '+
+                 '<span class="author">'+rekey.author+'</span> '+
+                 '<span class="time fr canhide">'+rekey.postdate+'</span> '+
+                '</div> </a> '+
+               '<!--<i class="icon_hot"></i>--> '+
+              '</section>';
+              return reHTML;
+        },
+        showHTMLthree : function(data){
+            var rekey = data;
+            var reHTML = "";
+            var k;
+            var knum = 0;
+            var isNew = rekey.is_new==1?' newIcon':'',isHot = rekey.digest==1?' jingIcon':'',isJing = rekey.hot==1?' hotIcon':'';
+
+              reHTML+='<section class=" has_action'+isNew+isHot+isJing+'"> '+
+              ' <a href="javascript:zy_touch(\'click_opacity\')" onclick="openWindow.select(3,'+rekey.tid+')" class="article_link clearfix"> <h3>'+rekey.subject+'</h3> '+
+                '<div class="list_image "> '+
+                 '<ul class="clearfix"> ';
+                 //for (var i=0; i < rekey.imgurls.length; i++) {
+                 
+                 for(k in rekey.imgurls){
+                   var imgre = rekey.imgurls[k];
+                   knum++;
+                   if(knum <= 3){
+                       reHTML+='<li>'+
+                       '<div class="list_img_holder_large" style="background-image:url('+imgre+'?imageView/2/w/200)"></div>'+
+                       '</li> ';
+                   }
+                 };
+                 reHTML+='</ul> '+
+                '</div> '+
+                '<div class="item_info"> '+
+                 '<span class="src space">'+rekey.form_name+'</span> '+
+                 '<span class="cmt">'+rekey.hits+'/'+rekey.replies+'</span> '+
+                 '<span class="author">'+rekey.author+'</span> '+
+                 '<span class="time fr canhide" title="2014-12-12 11:24">'+rekey.postdate+'</span> '+
+                '</div> </a> '+
+              '</section>';
+              return reHTML;
+        }
+        
+        /*,
+        //刷新帖子列表
+        flush_threads : function(forums_id){
+            uexWindow.toast(1,5,'加载中...',0);
+            Util.moveTop();
+            this.__load_treads(forums_id,function(thread_tpl_data){
+                            $id("content").innerHTML = "<div>"+thread_tpl_data+"</div>";
+                            uexWindow.closeToast();
+                        });
+        }*/
+        
+        
+    }
+    
+    function keepView(){
+        localStorage.ktData = $("#content").html();
+    }
+    function pickView(){
+        $("#content").html(localStorage.ktData).show();
+    }
+    </script>
+    </body>
+</html>

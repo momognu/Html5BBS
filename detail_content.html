@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" href="css/ui-tab.css">
+        <link rel="stylesheet" href="css/ui-base.css">
+        <link rel="stylesheet" href="css/ui-box.css">
+        <link rel="stylesheet" href="css/ui-color.css">
+        <link rel="stylesheet" href="css/ui-res.css">
+        <link rel="stylesheet" href="css/ui-365.css">
+        <script src="js/zepto.min.js"></script>
+        <script src="js/beihai365_comman.js"></script>
+        <script src="js/beihai365_global.js"></script>
+    </head>
+    <body class="um-vp detailBg">
+        <div id="page" class="up ub ub-ver" tabindex="0">
+            
+ 
+           
+            <!--header开始-->
+            <div style="display: none">
+                <div id="header">
+                    <div class="ub ub-ac read-header" onclick="stopPP(event);">
+                        <div class=" ub-f1">
+                            <div class="read-header-left ub ub-ac">
+                                <span class="read-header-back" ontouchstart="zy_touch('click_opacity')" onclick="closePage();"></span>
+                                <span class="read-header-title" id="read-header-title"></span>
+                            </div>
+                        </div>
+                        <div class="read-header-right ub ub-ac">
+                            <div class="read-header-tiedan" ontouchstart="zy_touch('click_opacity')" onclick="openTiedan()">
+                                <span>帖单</span>
+                            </div>
+                            <div class="read-header-share" ontouchstart="zy_touch('click_opacity')" onclick="showShare();">
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--header结束-->
+            <!--content开始-->
+            <div id="read-content" class="read-content isStart-none">
+                <div class="read-content-bottom" titie="撑开页面"></div>
+                <div class="isScroller-none">
+                    <div id="isScrollerHeight" >
+                        <div class="read-top-info" id="read-top-info">
+                            <!--顶部通栏按钮-->
+                        </div>
+                        <div class="read-list">
+
+                            <h1 class="read-list-title" style="display: none;"></h1>
+                            <div id="readHTML"></div>
+                        </div>
+                        <div id="footer-ad"></div>
+                        <div class="read-content-footer" style="display: none;">
+                            <span class="read-content-footer-hr"></span>
+                            <span class="read-content-footer-text"><em id="pullup"></em></span>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <!--content结束-->
+            <!--footer开始-->
+            <div style="display: none">
+                <div class="read-footer read-footer-fixed">
+                    <div id="footerBar" style="display: none;">
+                        <div class="ub ub-pj" onclick="stopPP(event);">
+                            <div class="read-footer-back js-read-footer-back" _onclick="closePage();">
+                                <div class="read-footer-bg"></div>
+                                <div class="read-footer-uptop-icon"></div>
+                            </div>
+                            <div class="read-footer-uptop" _onclick="oScroll.goTop();">
+                                <div class="read-footer-bg"></div>
+                                <div class="read-footer-uptop-text">
+                                    顶部
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!--footer结束-->
+        </div>
+    </body>
+
+    <script>
+        //带$的表示全局
+        var $end = 0;
+        var $page = 1;
+        var $allPage = 1;
+        var $tid = localStorage.tid;
+        var $cid;
+        var $fid;
+        var $louzhu;
+        //一次赋值终身受益
+        var $pageView = $("#page");
+        var $pullup = $("#pullup");
+        var $subject = $(".read-list-title");
+
+        var $pullupText = "继续向上拉加载下一页";
+        var $moreText = "松开加载下一页内容";
+        var $loddingText = "正在加载中..."
+        var isEnd = true;
+        var $readHeaderTitle = $("#read-header-title");
+        var $readTopInfo = $('#read-top-info');
+        //var $pagewap = $('.js-read-page');
+
+        var $footerAd = $('#footer-ad');
+        //var $replyNum = $('.js-read-footer-reply');
+
+        var $readContentFooter = $(".read-content-footer");
+
+        var $ispage = false;
+
+        //localStorage.isload = true;
+        var $isload = true;
+
+        var $winName = ("detail" + localStorage.detailWindowId);
+
+        var $clickNum = 0;
+        //记录来路
+        localStorage.shareType = 'detail';
+
+        //分享
+
+        var $shareUrl,
+            $shareTitle,
+            $shareContent,
+            $shareType = "sinlge";
+
+        window.uexOnload = function(type) {
+            if (!type) {
+                oRead.loadData();
+                isIOS7();
+
+            }
+        }
+        function uexInit() {
+            //打开上拉加载
+            uexWindow.setBounce(1);
+            uexWindow.notifyBounceEvent(1, 1);
+            var jsonDownBounce = '{"textColor":"#e7e7e7","imagePath":"","levelText":"松手加载下一页o(∩_∩)o ","pullToReloadText":"上拉到底部","releaseToReloadText":"松手回原处","loadingText":"下载中..."}';
+            uexWindow.setBounceParams(1, jsonDownBounce);
+            uexWindow.showBounceView("1", "#e7e7e7", 0);
+            uexWindow.onBounceStateChange = onBounceStateChange;
+            //上滑
+            uexWindow.onSlipedUpward = function() {
+
+                uexWindow.evaluateScript($winName, 0, "headerHide()");
+                //oScroll.header.hide();
+                //oScroll.footerBar.show();
+                //加载完数据重新绑定事件
+                oRead.dataEvent();
+            }
+            //下滑
+            uexWindow.onSlipedDownward = function() {
+                uexWindow.evaluateScript($winName, 0, "headerShow()");
+                //oScroll.header.show();
+                //oScroll.footerBar.hide();
+            }
+            //滑倒底部
+            uexWindow.onSlipedDownEdge = function() {
+                //oScroll.header.show();
+                //oScroll.footerBar.hide();
+            }
+            //滑倒顶部
+            uexWindow.onSlipedUpEdge = function() {
+                uexWindow.evaluateScript($winName, 0, "headerShow()");
+                //oScroll.header.show();
+                //oScroll.footerBar.hide();
+            }
+            //监听侧滑
+            uexWindow.onSwipeRight = function() {
+                //closePage();
+            }
+        }
+
+        function isIOS7() {
+            if (uexWidgetOne.iOS7Style) {
+
+                $("#page").prepend('<div id="iPoneDetail" class="iPhoneBar"></div>');
+                $(".read-header").css({
+                    "padding-top" : "1.25rem"
+                });
+                $("#isScrollerHeight").prepend('<div class="iPhoneBar iPhoneBardetail2"></div>');
+            }
+        }
+
+        function onBounceStateChange(type, state) {
+            switch(type) {
+            case 1:
+                if (state == 0) {
+                    $pullup.html($pullupText);
+                }
+                if (state == 1) {
+                    $pullup.html($moreText);
+                }
+                if (state == 2) {
+                    uexWindow.resetBounceView("1");
+                    oScroll.scrollUpend();
+                }
+                break;
+            }
+        }
+
+        function closePage() {
+            uexWindow.evaluateScript($winName, 0, "closeWin();");
+        }
+
+        //页面滚动
+        var oScroll = {
+            isScroll : 0,
+            readScroll : null,
+            header : $("#header"),
+            footer : $("#footer"),
+            footerBar : $("#footerBar"),
+            goTop : function() {
+                var _this = this;
+                $('body,html').scrollTop(0);
+                return false;
+            },
+            scrollUpend : function() {
+
+                //拉完后执行
+                var _this = this;
+                $pullup.html($loddingText);
+                _this.isScroll = 0;
+                $page = parseInt($page) + 1;
+                if (parseInt($page) > parseInt($allPage)) {
+                    $pullup.html("已经是最后一页了");
+                    $page = $allPage;
+                } else {
+                    oRead.loadDwon();
+                    //页码
+                    uexWindow.evaluateScript($winName, 0, "_setPage(" + $page + "," + $allPage + ");");
+                }
+
+            }
+        }
+        //分页(带_表示是其他页面需要调用的)
+        function _pageView() {
+
+            //先隐藏一些基本东西
+
+            //重新写
+            localStorage._page = $page;
+            localStorage.allPage = $allPage;
+            //防止它点击多次分页按钮
+            $('#js-layerv').remove();
+            var __height = $('#read-content').height();
+            //alert($(document).height())
+            //这样子加浮层不在浮动窗口中加是因为，她只需要挡头部，底部不需要遮挡，以z-index控制
+            $pageView.append('<div class="layerView_absolute" id="js-layerv" onclick="hideLayer()"  style="z-index:100; height: ' + __height + 'px"></div>');
+            var x = 0,
+                y = parseInt(($(window).height() / 4 * 3) - $("#footer").height()),
+                w = 0,
+                h = parseInt($(window).height() / 4);
+
+            uexWindow.evaluateScript($winName, 0, 'uexWindow.openPopover("detail_open_plus_page", 0, "detail_open_plus_page.html", "" , ' + x + ', ' + y + ', ' + w + ', ' + h + ', "", 0, 0);');
+
+        }
+
+        function hideLayer() {
+            uexWindow.closePopover('detail_open_plus_page');
+            $('#js-layerv').remove();
+        }
+
+        var arrayImg;
+        var arrayImgKey;
+        var isReload = false;
+        //
+        var oRead = {
+            loadData : function(end, ifreload, reload) {
+                if (ifreload) {
+                    $isload = ifreload;
+                }
+                if (reload == 1) {
+                    isReload = true;
+                }else{
+                    isReload = false;
+                }
+                //alert('d');
+                lodding.show();
+                var _this = this;
+                $end = end ? 1 : 0;
+                var getUrl = reLink('/index.php?c=threads&m=read&tid=' + $tid + '&p=' + $page + '&pattern=' + localStorage.pattern + '&cid=' + $cid + '&end=' + $end);
+                AJAX.get(getUrl, function(res) {
+                    _this.view(res);
+                }, function() {
+                    uexWindow.toast("1", "5", "数据加载失败了，关了再试一下吧~~~", "3000");
+                });
+                //加载完JSON执行的函数
+                //firstimg();
+                uexInit();
+            },
+            loadDwon : function() {
+                var _this = this;
+                AJAX.get(reLink('/index.php?c=threads&m=read&tid=' + $tid + '&p=' + $page + '&pattern=' + localStorage.pattern + '&cid=' + $cid + '&end=' + $end), function(res) {
+                    _this.view(res);
+                }, function() {
+                    uexWindow.toast("1", "5", "数据加载失败了，再下拉试一下~~~", "3000");
+                });
+            },
+            view : function(res) {
+                var _this = this;
+                if ($isload || $end == 1) {
+                    _this.info(res);
+                    $isload = false;
+                }
+
+                _this.list(res);
+                _this.setUp();
+                //页面列表
+                //_this.loadImg();
+                //由于使用iScroll需要等所有图片加载完后重设一下滚动的高
+                lodding.hide();
+
+            },
+            getFid :function(){//存下浏览的fid，用于浏览记录页
+                if(localStorage.browseFid){
+                    localStorage.browseFid = localStorage.browseFid +','+ $fid;
+                }else{
+                    localStorage.browseFid = $fid;
+                }    
+                //console.log(localStorage.browseFid)  
+            },
+            info : function(res) {
+                //这些数据只加载一次，所以可以用localStorage
+
+                //把数据转换成JSON
+                var getData = JSON.parse(res);
+                //localStorage._page = parseInt(getData.page);
+                $page = parseInt(getData.page);
+                //console.log(getData);
+                //存储一些基本数据
+                //localStorage.userName = getData.username;
+                $cid = getData.cid;
+                $fid = getData.fid;
+                
+                this.getFid();
+
+                $allPage = parseInt(getData.posts_all_p);
+                $louzhu = getData.louname;
+
+                //头部返回按钮旁边的文字
+                //$readHeaderTitle.html(getData.collection_name);
+                $readContentFooter.show();
+
+                //设置帖子标题
+                $subject.html(getData.subject).show();
+
+                //设置论坛
+                var fidBtn = '<div class="read-top-list ub ub-ac" urltype="2" urlid="' + getData.fid + '"  onclick="openWindow.select(\'2\',\'' + getData.fid + '\')">' + '<div class="read-top-lun">论</div>' + '<div class="ub-f1">' + getData.fidname + '</div>' + '<in></in>' + '</div>';
+                //设置贴单
+                var tiedanBtn = "";
+                if (getData.collection_num != "0") {
+                    tiedanBtn += '<div class="read-top-list ub ub-ac" urltype="6" urlid="' + $tid + '" urlview="list"  onclick="openWindow.select(\'6\',\'' + $tid + '\',\'list\')" >' + '<div class="read-top-dan">单</div>' + '<div class="read-top-con ub ub-f1" id="js-single-mian" >' + '<text class="ub-f1">' + getData.collection_des + '</text>等<em>' + getData.collection_num + '</em>个' + '</div>' + '<in></in>' + '</div>';
+                }
+                $readTopInfo.html(fidBtn + tiedanBtn);
+                //页码
+                uexWindow.evaluateScript($winName, 0, "_setPage(" + $page + "," + $allPage + ");");
+
+                //设置分享内容
+                $shareUrl = "http://m.beihai365.com/read.php?tid=" + $tid;
+                $shareTitle = getData.shareinfo.sharesubject;
+                $shareContent = getData.shareinfo.sharecontent;
+                $shareType = "sinlge";
+
+                //设置广告
+                if (getData.adurl) {
+                    $footerAd.html('<div class="read-footer-ad" onclick="openWindow.select(\'' + getData.adurl.newlinktype + '\',\'' + oRead.reAdurl(getData.adurl.newlinktype, getData.adurl.newlink, getData.adurl.url) + '\')"><img src="' + getData.adurl.img + '"></div>');
+                }
+                uexWindow.evaluateScript($winName, 0, "_setReply(" + getData.replies + ");");
+            },
+            list : function(res) {
+                //这里不要用本地存储
+                //把数据转换成JSON
+                var getData = JSON.parse(res);
+                var readTPL = "";
+                console.log(getData);
+                for (var i = 0; i < getData.posts.length; i++) {
+                    var re = getData.posts[i];
+                    readTPL += '<div class="read-list-loop" id="louView_' + re.lou + '" onclick="editLou(' + re.righttype + ',' + oRead.rePid(re.pid) + ',' + oRead.reLou(re.lou) + ',\'' + re.author + '\');">' + '<div class="read-list-user">';
+                    if (re.isshowlou == 1) {
+                        readTPL += '<div class="isshowlou">' + re.lou + '楼</div>';
+                    }
+                    readTPL += '<div class="ub">' + '<span class="read-list-pic"><img src="' + oRead.reIcon(re.icon) + '"></span>' + '<span class="read-list-name">' + re.author + '<em>' + re.postdate + '</em></span>' + '</div>' + '<span class="read-list-reply " onclick="qReply(this,event)" pid="' + oRead.rePid(re.pid) + '" lou="' + oRead.reLou(re.lou) + '"></span>' + '</div>' + '<div class="read-list-content" ><div id="readContent_' + re.lou + '">' + re.content + '</div><div id="leaveword_' + re.lou + '">' + oRead.reLeaveword(re.leaveword) + '</div></div>' + '</div>';
+                }
+                //alert($end)
+                if ($ispage || $end == 1) {
+                    $('#readHTML').html(readTPL);
+                } else {
+                    if (isReload) {
+                        $('#readHTML').html(readTPL);
+                    } else {
+                        $('#readHTML').append(readTPL);
+                    }
+
+                }
+
+                //列表外的内容
+                if (getData.posts_all_p - $page <= 0) {
+                    $pullup.html("已经是最后一页了");
+                    isEnd = false;
+                } else {
+                    $pullup.html("后面还有" + parseInt(getData.posts_all_p - $page) + "页")
+                }
+
+                //加载完数据重新绑定事件
+                oRead.dataEvent();
+            },
+            reIcon : function(s) {
+                if (!s) {
+                    s = "css/img/none.gif"
+                }
+                return s;
+            },
+            rePid : function(s) {
+                if (s) {
+                    return s;
+                }
+                return 0;
+            },
+            reLou : function(s) {
+                if (s) {
+                    return s;
+                }
+                return 0;
+            },
+            reAdurl : function(a, b, c) {
+                if (a == 5 || a == 8) {
+                    return c;
+                }
+                return b;
+            },
+            reLeaveword : function(s) {
+                var re = "";
+                if (s) {
+                    re = '<div class="leaveword"><span>' + $louzhu + '[楼主]：</span>' + s + '</div>'
+                }
+                return re;
+            },
+
+            addLeaveword : function(s, lou) {
+                var chahua = '<div class="leaveword"><span>' + $louzhu + '[楼主]：</span>' + s + '</div>'
+                $("#leaveword_" + lou).html(chahua);
+            },
+            editlouView : function(pid, lou) {
+                var bView = '<div class="ub ub-pc" style="height:3rem;"><img src="css/img/read/loading.gif" style="width:4rem;display:block;"></div>'
+                $("#readContent_" + lou).html(bView);
+
+                var geturl = reLink("/index.php?c=threads&m=postmode&op=getcontent&tid=" + $tid + "&pid=" + pid)
+
+                AJAX.get(geturl, function(res) {
+                    var res = JSON.parse(res);
+                    if (res.result == "success") {
+                        $("#readContent_" + lou).html(res.data);
+                    } else {
+                        uexWindow.toast("1", "5", "数据加载失败了，请刷新一下页面", "3000");
+                    }
+
+                }, function() {
+                    uexWindow.toast("1", "5", "数据加载失败了，请刷新一下页面", "3000");
+                });
+
+            },
+
+            setUp : function() {
+
+                if ($page == 1 || $ispage == true) {
+                    $ispage = false;
+                }
+
+            },
+            dataEvent : function() {
+                //加载结束执行
+                //绑定事件统一写在这里，并且写好注解。
+                if ($end == 1) {
+                    //alert($(document).height())
+                    $('body,html').scrollTop($("#read-content").height());
+                    return false;
+                }
+
+                //加载完遍历一下
+
+                //遍历图片
+                arrayImg = new Array();
+                arrayImgKey = 0;
+                $(".jpgimgMax").each(function() {
+                    $(this).attr("srcKey", arrayImgKey);
+                    /*
+                     $(this).css({
+                     "width" : $(window).width(),
+                     "max-width" : $(window).width()
+                     });
+                     */
+                    arrayImgKey++;
+                    arrayImg.push($(this).attr("_src"));
+                })
+            },
+            page : function(p) {
+
+                //点击分页执行
+                hideLayer();
+                oScroll.goTop();
+                $ispage = true;
+                $page = parseInt(p);
+                oRead.loadData();
+                //页码
+                uexWindow.evaluateScript($winName, 0, "_setPage(" + $page + "," + $allPage + ");");
+            }
+        }
+
+        //打开图片浏览器
+        function showImageBrowser(t, s) {
+            new setClick(function() {
+                if (s == 0) {
+                    var _img = $(t).attr("_src");
+                    uexImageBrowser.open(_img, s);
+                    //$(t).html('<span class="">点击收起</span><br><img src="' + _img + '" width="100%"><div style="">11</div>')
+                } else {
+                    var key = $(t).attr("srcKey");
+                    uexImageBrowser.open(arrayImg, key);
+                }
+
+            });
+        }
+
+        /*贴单打开*/
+        function openTiedan() {
+
+            var uid = getLs('uid');
+            var username = getLs('username');
+            localStorage.returnType = "detailTiedan"
+            if (!uid) {
+                localStorage.loginType = $winName;
+                newOpenWin('login', 'login.html')
+            } else {
+                localStorage.tid = $tid;
+                localStorage.cid = $cid;
+
+                var detail_open_plus_tiedan_showHtml = '<div class="layerView" onclick="colseTiedan()" style="z-index:9999"></div>'
+                $('#page').append(detail_open_plus_tiedan_showHtml);
+                var x = 0,
+                    y = parseInt(localStorage.windowHeight / 3 * 1),
+                    w = 0,
+                    h = parseInt(localStorage.windowHeight / 3 * 2);
+                uexWindow.evaluateScript($winName, 0, "uexWindow.openPopover('detail_open_plus_tiedan', 0, 'detail_open_plus_tiedan.html', '', " + x + ", " + y + ", " + w + ", " + h + ", '', 0, 0);");
+            }
+
+        }
+
+        function colseTiedan() {
+            uexWindow.closePopover('detail_open_plus_tiedan');
+            $('.layerView').remove()
+        }
+
+        function firstimg() {
+            //第一次进入帖子。
+            if (!localStorage.firstshow) {
+                uexWindow.evaluateScript($winName, 0, 'uexWindow.openPopover("first-page", 0, "first_page.html", "", 0, 0, 0, 0, "", 0, 0);');
+                localStorage.firstshow = 'true';
+            }
+        }
+
+        //底部按钮
+        function _replyBtn() {
+            var uid = getLs('uid');
+            var username = getLs('username');
+            localStorage.floorac = 'huifu';
+            localStorage.returnType = "detailReply"
+            //传到下个页面去
+            localStorage.fid = $fid;
+            localStorage.tid = $tid;
+            if (!uid) {
+                //登录回调
+                localStorage.loginType = $winName;
+                newOpenWin('login', 'login.html')
+            } else {
+                newOpenWin('replies', 'replies.html')
+            }
+        }
+
+        function setShare() {
+            localStorage.shareUrl = $shareUrl;
+            localStorage.shareTitle = $shareTitle;
+            localStorage.shareContent = $shareContent;
+            localStorage.shareType = "detail";
+        }
+
+        //引用回复ICON按钮
+        function qReply(t,e) {
+            localStorage.pid = $(t).attr("pid");
+            localStorage.lou = $(t).attr("lou");
+            _replyBtn();
+            e.stopPropagation();
+        }
+
+        /*****
+         *
+         * 旧版本回复代码开始
+         *  ****/
+        /*回复按钮*/
+        function repliesBtn(floorac) {
+            var uid = localStorage.uid;
+            var username = localStorage.username;
+            localStorage.floorac = floorac;
+            //传到下个页面去
+            localStorage.returnType = "detailReply"
+            localStorage.fid = $fid;
+            localStorage.tid = $tid;
+
+            if (floorac == 'jubao') {
+                console.log(localStorage);
+                var name = (localStorage.uid) ? localStorage.uid : '';
+                var username = (localStorage.uid) ? localStorage.username : '';
+                var pid = (localStorage.pid) ? localStorage.pid : '';
+                var posturl = 'http://plus.beihai365.com/showthread/report.php?jsoncallback=?&do=report&tid=' + localStorage.tid + '&pid=' + pid + '&reporter=' + username + '&reporterid=' + name + '&deviceid=' + localStorage.macAddress;
+
+                $.getJSON(posturl, function(data) {
+                    console.log(data);
+                    if (data == 'success') {
+                        uexWindow.toast("0", "5", "举报成功！", "3000");
+                    } else {
+                        uexWindow.toast("0", "5", "举报失败！", "3000");
+                    };
+                });
+
+            } else {
+                if (!uid) {
+                    localStorage.loginType = $winName;
+                    newOpenWin('login', 'login.html')
+                } else {
+                    newOpenWin('replies', 'replies.html')
+                }
+            }
+        }
+
+        function delmyRead() {
+            uexWindow.cbConfirm = delmyReadcb;
+            var as = ['取消', '确定'];
+            uexWindow.confirm('小编提示', '你确定要删除这个帖子吗？（删除不可恢复）', as);
+
+        }
+
+        function delmyReadcb(opId, dataTypep, data) {
+            if (data == 1) {
+                json_url = reLink("/index.php?jsoncallback=?&c=floor&ac=replymodify&uid=" + localStorage.uid + "&fid=" + $fid + "&tid=" + localStorage.tid + "&pid=" + localStorage.pid + "&step=1");
+                $.getJSON(json_url, function(data) {
+                    if (data.success) {
+                        uexWindow.toast("0", "5", "回帖已成功删除！", "3000");
+                        $("#louView_" + localStorage.lou).hide();
+                    };
+                });
+            }
+        }
+
+        function bianjicbSuccess(opId, dataTypep, data) {
+            if (data == 1) {
+                repliesBtn('bianji');
+            }
+
+        }
+
+        function editLou(key, pid, lou, louzz) {
+            localStorage.pid = pid;
+            localStorage.lou = lou;
+            localStorage.louzz = louzz;
+            //alert($fid)
+            //fid和tid
+            localStorage.fid = $fid;
+            localStorage.tid = $tid;
+            console.log(localStorage);
+
+            switch(key) {
+            case 0:
+                uexWindow.cbActionSheet = editcbSuccess1;
+                var as = ['引用回复', '举报'];
+                break;
+            case 1:
+                uexWindow.cbActionSheet = editcbSuccess1;
+                var as = ['引用回复', '举报'];
+                break;
+            case 2:
+                uexWindow.cbActionSheet = editcbSuccess2;
+                var as = ['引用回复', '楼主插话', '举报'];
+                break;
+            case 3:
+                uexWindow.cbActionSheet = editcbSuccess3;
+                var as = ['引用回复', '举报', '编辑', '删除'];
+                break;
+            case 5:
+                uexWindow.cbActionSheet = editcbSuccess5;
+                var as = ['举报'];
+                break;
+            default:
+                return;
+
+            }
+
+            uexWindow.actionSheet('楼层操作', '取消', as);
+        }
+
+        function editcbSuccess1(opId, dataType, data) {
+            if (data == 0) {
+                repliesBtn('yinyong');
+            } else if (data == 1) {
+                repliesBtn('jubao');
+            }
+        }
+
+        function editcbSuccess2(opId, dataType, data) {
+            if (data == 0) {
+                repliesBtn('yinyong');
+            } else if (data == 1) {
+                repliesBtn('chahua');
+            } else if (data == 2) {
+                repliesBtn('jubao');
+            }
+        }
+
+        function editcbSuccess3(opId, dataTypep, data) {
+            if (data == 0) {
+                repliesBtn('yinyong');
+            } else if (data == 1) {
+                repliesBtn('jubao');
+            } else if (data == 2) {
+                uexWindow.cbConfirm = bianjicbSuccess;
+                var as = ['取消', '确定'];
+                uexWindow.confirm('小编提示', '在客户端对该楼层进行编辑，将会丢失楼层内容原本的排版格式、字号、颜色！你确定要对这个楼层进行编辑吗？', as);
+
+            } else if (data == 3) {
+                delmyRead();
+            }
+        }
+
+        function editcbSuccess5(opId, dataTypep, data) {
+            if (data == 0) {
+                repliesBtn('jubao');
+            }
+        }
+
+        /*旧版本回复代码全部结束*/
+
+        /**
+         var TimeLongFn = null;
+         function longtouch(t){
+         clearTimeout(TimeLongFn);
+         TimeLongFn = setTimeout(function(){
+         //do function在此处写单击事件要执行的代码
+         alert("按了3秒")
+         },3000);
+         }
+         function longtouchend(t){
+         clearTimeout(TimeLongFn);
+         }
+         **/
+        
+
+        
+        
+    </script>
+
+</html>

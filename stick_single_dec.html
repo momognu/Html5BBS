@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" href="css/ui-tab.css">
+        <link rel="stylesheet" href="css/ui-base.css">
+        <link rel="stylesheet" href="css/ui-box.css">
+        <link rel="stylesheet" href="css/ui-color.css">
+        <link rel="stylesheet" href="css/ui-res.css">
+        <link rel="stylesheet" href="css/ui-365.css">
+        <link rel="stylesheet" href="css/ui-single.css">
+        <script src="js/zepto.min.js"></script>
+        <script src="js/zy_control.js"></script>
+        <script src="js/zy_click.js"></script>
+        <script src="js/beihai365_comman.js"></script>
+        <script src="js/beihai365_global.js"></script>
+
+    </head>
+
+    <body class="um-vp bg365" ontouchstart>
+
+        <div id="page_0" class="up ub ub-ver" tabindex="0">
+            <!--header开始-->
+            <div id="header">
+                <div class="ub ub-ac read-header" onclick="stopPP(event);">
+                    <div class="read-header-left ub ub-ac ub-f1">
+                        <span class="read-header-back" onclick="closeWin();"></span>
+                        <span class="read-header-title js-head-title" onclick="closeWin()"></span>
+                    </div>
+                    <div class="read-header-right sing_right ub ub-ac">
+                        <div class="read-header-tiedan  hide js-followed">
+                            <span class="read-roll">已关注</span>
+                        </div>
+                        <div class="read-header-share js-share-btn hide" onclick="shareView()">
+                            <span></span>
+                        </div>
+                        <div class="read-header-more js-set-btn hide" onclick="setBtn();"></div>
+                        <div class="js-save-btn hide sing_save" >
+                            关闭
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--header结束-->
+
+            <!--content开始-->
+            <div id="stick_single_dec_content" class="ub-f1 tx-l t-bla ub-img6"></div>
+
+
+            <!--content结束--><!--footer开始-->
+
+            <!--footer结束-->
+
+        </div>
+    </body>
+    <script>
+        zy_init();
+        var uid = localStorage.uid,
+            cid = localStorage.singleCid,
+            isinv = localStorage.ifCreatorInv;
+        //新建贴单进来的详情。
+
+        var tidanuid = '';
+        //该贴单的作者
+
+        //分享所需要的
+        var sharefollow_num = '0',
+            sharetitle = '',
+            sharelistnum = 0;
+        window.uexOnload = function(type) {
+            if (!type) {
+                if (uexWidgetOne.iOS7Style) {
+                    $("#header .read-header").css({
+                        "padding-top" : "1.25rem"
+                    });
+                }
+                //监听android返回按钮
+                uexWindow.setReportKey(0,1);
+                uexWindow.onKeyPressed = function(keyCode) {
+                    if (keyCode == 0) {
+                        closeWin();
+                    }
+                };
+                zy_con("stick_single_dec_content", "stick_single_dec_content.html", 0, $$("header").offsetHeight);
+            }
+
+            window.onorientationchange = window.onresize = function() {
+            }
+        }
+        function setTitle(s) {
+            //alert("ddd")
+            if (s == 1) {
+          
+                $('.read-header-back').hide();
+                $('.js-head-title').text('关闭预览').css({
+                    "padding-left" : ".625rem"
+                });
+            
+            } else {
+                $('.js-set-btn').addClass('hide');
+                $('.js-head-title').text('帖单');
+            }
+        }
+
+        function rightBtn(s) {
+            //alert("ddd")
+            if (s == 0) {
+                $('.js-share-btn, .js-set-btn').addClass('hide');
+            }else{
+                $('.js-share-btn, .js-set-btn').removeClass('hide');
+            }
+        }
+
+        function setBtn() {
+            var h = $('body').height() - $("#header").height();
+            uexWindow.evaluatePopoverScript("", "stick_single_dec_content", "_setBtn(" + h + ");");
+        }
+
+        function setfollowed(s) {
+            if (s == 0) {
+                $('.js-followed').removeClass('hide');
+            } else {
+                $('.js-followed').addClass('hide');
+            }
+        }
+
+        function shareView() {
+            uexWindow.openPopover("shares", 0, "shares.html", '', 0, 0, 0, 0, '', 0, 0);
+        }
+
+        //用于刷新子页面
+        onloadHtml = {
+            createHtml : function() {
+                uexWindow.evaluatePopoverScript("", "stick_single_dec_content", "onloadHtml.createHtml()");
+            }
+        }
+
+        function cancelFollow() {
+            //取消关注
+            var cancelurl = '/index.php?c=threadslist&do=cancel_follow_collection&cid=' + cid;
+            cancelurl = reLink(cancelurl);
+            var that = $(this);
+
+            AJAX.get(cancelurl, function(data) {
+                var data = JSON.parse(data);
+
+                console.log(data);
+
+                if (data.result == 'success') {
+                    $('.js-followed').addClass('hide');
+                    var listWinName = ("single-list" + localStorage.tiedanWindowId );
+                    uexWindow.evaluateScript(listWinName, 0, "onloadHtml.createHtml()");
+
+                    console.log(listWinName);
+
+                    uexWindow.evaluatePopoverScript("", "stick_single_dec_content", "operate.successFollew()");
+                    uexWindow.toast("0", "5", '取消成功', "2000");
+                } else {
+                    uexWindow.toast("0", "5", data.msg, "1000");
+                }
+            }, function() {
+                alert('数据获取失败');
+            })
+        }
+
+        //取消关注
+        $('.js-followed').click(function() {
+            cancelFollow();
+        })
+        function closeWin() {
+            uexWindow.close('-1');
+            localStorage.tiedanDecWindowId = parseInt(parseInt(localStorage.tiedanDecWindowId) - 1);
+        }
+
+
+        //登录回调，请放最后
+        //使用方法，open login.html的时候设置localStorage.loginType为当前窗口name即可回调
+        function loginCallback(){
+            //登录成功后关闭该窗口
+            uexWindow.evaluateScript("login", 0, "colse();");
+            
+            //要执行的方法
+            onloadHtml.createHtml();
+        }
+
+
+    </script>
+</html>

@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" href="css/ui-tab.css">
+        <link rel="stylesheet" href="css/ui-base.css">
+        <link rel="stylesheet" href="css/ui-box.css">
+        <link rel="stylesheet" href="css/ui-color.css">
+        <link rel="stylesheet" href="css/ui-res.css">
+        <link rel="stylesheet" href="css/ui-365.css">
+        <script src="js/zy_control.js"></script>
+        <script src="js/zy_click.js"></script>
+        <script src="js/beihai365_comman.js"></script>
+        <script src="js/beihai365_global.js"></script>
+        <script src="js/AppDown.js"></script>
+        <!--<script src="js/TaobeihaiAppDown.js"></script>-->
+    </head>
+
+    <body class="um-vp c-wh m2-homeNewbg" ontouchstart>
+        <div id="page_0" class="up ub ub-ver" tabindex="0">
+            <!--header开始-->
+            <!--header结束-->
+            <!--content开始-->
+            <div id="index_content" class="ub-f1 tx-l t-bla ub-img6 clearfloat">
+                <div id="percentage">
+
+                </div>
+
+                <!--列表开始-->
+                <div style="height: 1rem; width: 100%; clear: both;"></div>
+
+                <div class="list_more_border" >
+                    <div class="list_more_li ub " ontouchstart="zy_touch('click_opacity')" onclick="openWindow.select('2','684','')">
+                        <div class="ub-f1" >
+                            <div class="titie f18">
+                                用户论坛<span class="sub f12"> 说说您对客户端的意见和建议 </span>
+                            </div>
+                        </div>
+                        <div class="list_more_jiantou"></div>
+                    </div>
+                </div>
+                <!--			<div class="list_more_border" style=" background:#f7f7f7;"">
+                <div class="list_more_li ub">
+                <div class="ub-f1" >
+                <div class="titie f18">无图模式（省流量）</div>
+                <div class="sub f12">开启无图模式，帮助节省流量<br><span id="wtzhuangtai" ztai="false">当前状态：关闭</span></div>
+                </div>
+                <div class="list_more_wutu" id="list_more_wutu"  ontouchstart="zy_touch('click_opacity')" onclick="openPic()">
+                <span class="onoff"><label><i></i></label></span>
+                </div>
+                </div>
+                </div>
+                -->
+
+                <div class="list_more_border" id="modeqiehuan">
+                    <div class="list_more_li ub list_more_li_bt list_more_li_one" ontouchstart="zy_touch('click_opacity')" onclick="mode.wutu()">
+                        <div class="ub-f1" >
+                            <div class="titie f18">
+                                无图模式（省流量）
+                            </div>
+                            <div class="sub f12"></div>
+                        </div>
+                        <div class="list_more_jiantou list_more_jiantou_none " id="wutupic"></div>
+                    </div>
+                    <!--<div class="list_more_li ub list_more_li_bt list_more_li_one" ontouchstart="zy_touch('click_opacity')" onclick="mode.xiaotu()">
+                    <div class="ub-f1" >
+                    <div class="titie f18">
+                    小图模式
+                    </div>
+                    <div class="sub f12"></div>
+                    </div>
+                    <div class="list_more_jiantou list_more_jiantou_none" id="xiaotupic"></div>
+                    </div>-->
+                    <div class="list_more_li ub list_more_li_one" ontouchstart="zy_touch('click_opacity')" onclick="mode.xiaotu()">
+                        <div class="ub-f1" >
+                            <div class="titie f18">
+                                大图模式
+                            </div>
+                            <div class="sub f12"></div>
+                        </div>
+                        <div class="list_more_jiantou list_more_jiantou_none" id="xiaotupic"></div>
+                    </div>
+                </div>
+
+                <div class="list_more_border">
+                    <div class="list_more_li ub list_more_li_bt" ontouchstart="zy_touch('click_opacity')" onclick="goAppDwon()">
+                        <div class="ub-f1" >
+                            <div class="titie f18">
+                                发下载地址给朋友
+                            </div>
+
+                        </div>
+                        <div class="list_more_jiantou list_more_setUrl"></div>
+                    </div>
+                    <div class="isAndroid">
+                        <div class="list_more_li ub" ontouchstart="zy_touch('click_opacity')" onclick="newOpenWin('share','share.html' , 1024)">
+                            <div class="ub-f1" >
+                                <div class="titie f18">
+                                    帮朋友安装<span class="sub f12"> 扫描二维码或直接输入网址 </span>
+                                </div>
+
+                            </div>
+                            <div class="list_more_jiantou list_more_setQr"></div>
+                        </div>
+                    </div>
+                    <div class="isIOS">
+                        <div class="list_more_li list_more_li_bt ub" ontouchstart="zy_touch('click_opacity')" onclick="newOpenWin('share','share.html' , 1024)">
+                            <div class="ub-f1" >
+                                <div class="titie f18">
+                                    帮朋友安装<span class="sub f12"> 扫描二维码或直接输入网址 </span>
+                                </div>
+
+                            </div>
+                            <div class="list_more_jiantou list_more_setQr"></div>
+                        </div>
+                        <!--<div class="list_more_li ub list_more_li_bt" ontouchstart="zy_touch('click_opacity')" onclick="clearLS()">
+                            <div class="ub-f1" >
+                                <div class="titie f18">
+                                    清除缓存<span class="sub f12">登录状态等内容（不包含图片） </span>
+                                </div>
+    
+                            </div>
+                            <div class="list_more_jiantou"></div>
+                        </div>-->
+                        <div class="list_more_li ub" ontouchstart="zy_touch('click_opacity')" onclick="newOpenWin('about','about.html' ,1024)">
+                            <div class="ub-f1" >
+                                <div class="titie f18">
+                                    关于
+                                </div>
+
+                            </div>
+                            <div class="list_more_jiantou list_more_jiantou_none"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="list_more_border isAndroid">
+                    <div class="list_more_li ub list_more_li_bt list_more_li_one" ontouchstart="zy_touch('click_opacity')" onclick="app_update(true)">
+                        <div class="ub-f1" >
+                            <div class="titie f18">
+                                检查新版本
+                            </div>
+                            <div class="sub f12"></div>
+                        </div>
+                        <div class="list_more_jiantou list_more_jiantou_none"></div>
+                    </div>
+                    <!--<div class="list_more_li ub list_more_li_bt" ontouchstart="zy_touch('click_opacity')" onclick="clearLS()">
+                        <div class="ub-f1" >
+                            <div class="titie f18">
+                                清除缓存<span class="sub f12">登录状态等内容（不包含图片）
+                            </div>
+     
+                        </div>
+                        <div class="list_more_jiantou"></div>
+                    </div>-->
+
+                    <div class="list_more_li ub" ontouchstart="zy_touch('click_opacity')" onclick="newOpenWin('about','about.html' ,1024)">
+                        <div class="ub-f1" >
+                            <div class="titie f18">
+                                关于
+                            </div>
+
+                        </div>
+                        <div class="list_more_jiantou list_more_jiantou_none"></div>
+                    </div>
+
+                </div>
+                <div class="list_more_border list_more_border_down" id="taobeihaidown" style="display: none">
+                    <a onclick="taobeihai();">
+                    <div class="list_more_li list_more_li_tao ub" ontouchstart="zy_touch('click_opacity')" >
+                        <div class="ub-f1">
+                            <div class="titie f18">
+                                淘北海
+                            </div>
+                            <div class="sub f12">
+                                每天有低价团购，吃喝玩乐更优惠
+                            </div>
+                        </div>
+                        <div class="list_more_jiantou" id="downtaobeihaibtn" downapp="ok">
+                            <span class="f14">下载</span>
+                        </div>
+                    </div> </a>
+                </div>
+                
+                <div class="list_more_border list_more_border_down" id="taobeihaidownforios" style="display: none">
+                    <a href="https://itunes.apple.com/us/app/tao-bei-hai-bei-hai365de-tuan/id974550727?l=zh&ls=1&mt=8" target="_blank">
+                    <div class="list_more_li list_more_li_tao ub" ontouchstart="zy_touch('click_opacity')" >
+                        <div class="ub-f1">
+                            <div class="titie f18">
+                                淘北海
+                            </div>
+                            <div class="sub f12">
+                                每天有低价团购，吃喝玩乐更优惠
+                            </div>
+                        </div>
+                        <div class="list_more_jiantou" id="downtaobeihaibtn" downapp="ok">
+                            <span class="f14">下载</span>
+                        </div>
+                    </div> </a>
+                </div>
+                <div class="list_more_border list_more_border_down" id="jobdown" style="display: none">
+                    <a onclick="job();">
+                    <div class="list_more_li list_more_li_job ub" ontouchstart="zy_touch('click_opacity')"  onclick="jobappdownload();">
+                        <div class="ub-f1">
+                            <div class="titie f18">
+                                北海365招聘网
+                            </div>
+                            <div class="sub f12">
+                                全北海工作职位最全最新的招聘平台
+                            </div>
+                        </div>
+                        <div class="list_more_jiantou" id="downjobbtn" downapp="ok">
+                            <span class="f14">下载</span>
+                        </div>
+                    </div> </a>
+                </div>
+
+                <div class="list_more_border list_more_border_down" id="jobdownforios" style="display: none">
+                    <a href="https://itunes.apple.com/hk/app/bei-hai365zhao-pin/id897455585?l=zh&mt=8" target="_blank">
+                    <div class="list_more_li list_more_li_job ub" ontouchstart="zy_touch('click_opacity')"  onclick="jobappdownload();">
+                        <div class="ub-f1">
+                            <div class="titie f18">
+                                北海365招聘网
+                            </div>
+                            <div class="sub f12">
+                                北海工作职位最全最新的招聘平台
+                            </div>
+                        </div>
+                        <div class="list_more_jiantou" id="downjobbtnforios" downapp="ok">
+                            <span class="f14">下载</span>
+                        </div>
+                    </div> </a>
+                </div>
+                
+            
+                
+                <div class="outBtn" id="outBtn" ontouchstart="zy_touch('click_opacity')" onclick="logout();" >
+                    <span>退出登录</span>
+                </div>
+
+                <div style="height: .625rem;"></div>
+
+            </div>
+            <!--列表结束-->
+
+        </div>
+
+        <!--content结束--><!--footer开始-->
+
+        <!--footer结束-->
+
+        </div>
+    </body>
+    <script src="js/zepto.min.js"></script>
+    <script>
+        //记录来路
+        zy_init();
+        window.uexOnload = function(type) {
+            if (!type) {
+
+                //helloBB();
+
+                uexWindow.setBounce("0");
+                localStorage.returnType = "more"
+
+                login();
+                //**是否有图临时解决
+                if (localStorage.pattern == 'none_pic') {
+                    $("#wutupic").addClass("list_more_dagou");
+                } else if (localStorage.pattern == 'small_pic') {
+                    $("#xiaotupic").addClass("list_more_dagou");
+                } else if (localStorage.pattern == 'big_pic') {
+                    $("#datupic").addClass("list_more_dagou");
+                }
+
+                if (localStorage.myIndex == 'xinban') {
+                    $("#xinban").addClass("list_more_dagou");
+                } else if (localStorage.myIndex == 'jiuban') {
+                    $("#jiuban").addClass("list_more_dagou");
+                }
+
+                if (uexWidgetOne.platformName == 'android') {
+                    $("#jobdown").show();
+                    $("#taobeihaidown").show();
+
+                    $(".isAndroid").show();
+                    $(".isIOS").hide();
+                } else {
+                    $("#jobdownforios").show();
+                    $("#taobeihaidownforios").show();
+                    $(".isAndroid").hide();
+                    $(".isIOS").show();
+                }
+
+                if (localStorage.downJobAppName) {
+                    $("#downjobbtn").html('<span class="f12">重装</span>');
+                }
+                if (localStorage.downtaobeihaiAppName) {
+                    $("#downtaobeihaibtn").html('<span class="f12">重装</span>');
+                }
+            }
+
+        }
+        var mode = {
+            //测试是否到了底部
+            wutu : function() {
+                $("#modeqiehuan").find(".list_more_jiantou").removeClass("list_more_dagou");
+                $("#wutupic").addClass("list_more_dagou");
+                localStorage.pattern = 'none_pic';
+            },
+            xiaotu : function() {
+                $("#modeqiehuan").find(".list_more_jiantou").removeClass("list_more_dagou");
+                $("#xiaotupic").addClass("list_more_dagou");
+                localStorage.pattern = 'small_pic';
+            },
+            datu : function() {
+                $("#modeqiehuan").find(".list_more_jiantou").removeClass("list_more_dagou");
+                $("#datupic").addClass("list_more_dagou");
+                localStorage.pattern = 'big_pic';
+            },
+            xinban : function() {
+                $("#myIndex").find(".list_more_jiantou").removeClass("list_more_dagou");
+                $("#xinban").addClass("list_more_dagou");
+                localStorage.myIndex = 'xinban';
+            },
+            jiuban : function() {
+                $("#myIndex").find(".list_more_jiantou").removeClass("list_more_dagou");
+                $("#jiuban").addClass("list_more_dagou");
+                localStorage.myIndex = 'jiuban';
+            }
+        }
+        //淘北海
+        function taobeihai() {
+            $("#downTipsBoxTitle").html("正在下载淘北海");
+            $("#downtaobeihaibtn span").html("重下");
+            AppDownload(12345633, 'http://download.app.taobeihai.com/code/appdownload.php?for=taobeihai', 'taobeihai.apk');
+        }
+
+        //招聘网
+        function job() {
+            $("#downTipsBoxTitle").html("正在下载招聘网");
+            $("#downjobbtn span").html("重下");
+            AppDownload(12345634, 'http://download.app.taobeihai.com/code/appdownload.php?for=job', 'job.apk');
+        }
+
+        function openPic() {
+            if ($("#wtzhuangtai").attr("ztai") == 'false') {
+                $("#wtzhuangtai").attr({
+                    'ztai' : 'true'
+                })
+                $("#wtzhuangtai").html("当前状态：关闭");
+                $(".onoff").removeClass("onoff-on");
+                localStorage.pattern = 'small_pic';
+
+            } else {
+                $("#wtzhuangtai").attr({
+                    'ztai' : 'false'
+                });
+                $("#wtzhuangtai").html("当前状态：开启");
+                $(".onoff").addClass("onoff-on");
+                localStorage.pattern = 'none_pic';
+            }
+        }
+
+        function login() {
+            var name = localStorage.username;
+            if (name) {
+                $id("outBtn").style.display = "block";
+            } else {
+                $id("outBtn").style.display = "none";
+            }
+        }
+
+        function clearLS() {
+            localStorage.clear();
+            uexWindow.toast("1", "5", "清除完成", "3000");
+        }
+
+        function logout() {
+            localStorage.removeItem('tzwy');
+            localStorage.isLoginout = 'true';
+            uexWindow.toast("1", "5", "正在退出…", "1000");
+
+            $.getJSON("http://www.beihai365.com/phoneapi/index.php?c=thread&m=baseInterface&ac=synlogout", function(data){
+                if(data.result == "success"){
+                    localStorage.tzwy = data.data.url;
+                    setTimeout(function() {
+                        uexWindow.evaluateScript("root", 0, "login('more');");
+                        //login();
+                    }, 1000);
+                }
+            });
+
+            localStorage.removeItem('uid');
+            localStorage.removeItem('username');
+            localStorage.removeItem('save_code');
+            
+        }
+
+        function openlist(name, fid, form_name) {
+            LS.posts({
+                'fid' : fid,
+                'form_name' : form_name
+            });
+            newOpenWin('listwin', name + '.html');
+        }
+
+        function goAppDwon() {
+            uexWindow.cbActionSheet = goAppDwoncb;
+            var as = ['短信发送'];
+            uexWindow.actionSheet('', '取消', as);
+        }
+
+        function goAppDwoncb(opId, dataType, data) {
+            if (data == 0) {
+                sms_share();
+            }
+        }
+
+        // 短信发送
+        function sms_share() {
+            var iphone_number = '';
+            var SMScontent = '北海365网推出了手机客户端，我用客户端上365看帖、发帖感觉非常的方便，推荐您也来装一个。http://m.beihai365.com/  （点击地址就可进入下载页面）';
+            uexSMS.open(iphone_number, SMScontent);
+
+        }
+
+        // 邮件发送
+        function mail_share() {
+            var mail = '';
+            var MAILtitle = '给你推荐北海365网客户端';
+            var MAILcontent = '北海365网推出了手机客户端，我用客户端上365感觉非常的方便，推荐您也来下载玩玩！点击下面这个地址，就可以进入下载页面：http://m.beihai365.com/';
+            uexEmail.open(mail, MAILtitle, MAILcontent, '');
+        }
+    </script>
+</html>
